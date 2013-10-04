@@ -1,4 +1,4 @@
-scripts
+Scripts
 =======
 
-Divers scripts bash pour Linux
+Divers scripts bash pour Linux.
