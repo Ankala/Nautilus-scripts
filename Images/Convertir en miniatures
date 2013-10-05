@@ -1,0 +1,55 @@
+#!/bin/bash
+########################################################################
+#Script permettant de transformer les images sélectionnées en miniatures (taille paramétrable)
+#Nom du script: Convertir en miniatures v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de ImageMagick
+#Licence: GPL v3
+#À venir en v1.1: Plus d'options ?
+########################################################################
+version="v1.0"
+IFS="
+"
+	# On s'assure qu'un fichier est seléctionné
+	mime=`file -bi "$1"`;
+	correct_image="0";
+	
+	# On s'assure que le fichier IMAGE est dans le bon format: png, jpg, gif
+	if echo "$1" | grep -q '.png'|| echo "$1" | grep -q '.PNG'; then
+		echo "File is in .png Format"
+		image_type="png"
+		correct_image="1"
+	elif echo "$1" | grep -q '.jpeg'|| echo "$1" | grep -q '.JPEG'; then
+		echo "File is in .jpeg Format"
+		image_type="jpeg"
+		correct_image="1"
+	elif echo "$1" | grep -q '.jpg' || echo "$1" | grep -q '.JPG'; then
+		echo "File is in .jpg Format"
+		image_type="jpg"
+		correct_image="1"
+	elif echo "$1" | grep -q '.gif'|| echo "$1" | grep -q '.GIF'; then
+		echo "File is in .gif Format"
+		image_type="gif"
+		correct_image="1"
+	elif [ $1 -eq 0 ]; then
+		zenity --error --title="Erreur" --text="Vous devez sélectionner un fichier image..."
+		exit 1
+	elif [ $correct_image -eq 0 ]; then
+		zenity --error --title="Erreur - Format non supporté -" --text="Les formats image supportés sont: <b>png, jpg, gif</b>."
+		exit 1
+	else
+		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+		exit 1
+	fi
+
+	# Si le format du fichier est correct, on démarre l'opération
+	if [ $correct_image -eq "1" ]; then
+	# Paramétrer la résolution des miniatures
+  	checksize=`zenity --entry --title="Convertir en miniatures $version" --entry-text "150x150" --text="Les miniatures seront enregistrées dans le répertoire 'miniatures' prévu à cet effet. \n\nVous pouvez modifier la taille (résolution) des miniatures, en pixels.\n\nexemple: 125x125 ou 300x300"`
+mkdir miniatures
+mogrify -path miniatures -thumbnail $checksize $@ \
+| zenity --progress --width="500" --pulsate --title "Création des miniatures en cours..." \
+--text "Les miniatures des images sélectionnées sont en cours de création." --auto-close
+notify-send "Images en miniatures" "Les images sélectionnées ont été converties en miniatures (dimensions $checksize) avec succès !"
+fi

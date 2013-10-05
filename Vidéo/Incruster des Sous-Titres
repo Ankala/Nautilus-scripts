@@ -1,0 +1,137 @@
+#!/bin/bash
+########################################################################
+#Script incrustant des sous-titres (srt) directement dans une vidéo
+#Nom du script: Incruster des Sous-Titres v1.1
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de Mencoder
+#Licence: GPL v3
+#À venir en v1.2: ?
+########################################################################
+version="v1.1"	# Ajout de plus de formats vidéo et de sous-titres
+IFS="
+"
+
+	# On s'assure que 'mencoder' est bien installé
+	mencoder_exists=`which mencoder | grep -c "mencoder"`
+
+	# On affiche une erreur si 'mencoder' n'est pas installé
+	# On tente une installation automatique de 'mencoder'
+	if [ $mencoder_exists -eq 0 ]; then
+	mencoder_error=`zenity --error --title="Erreur - Outil de conversion manquant !" --text="Vous devez installer le paquet mencoder afin d'utiliser ce script.\n\nTentative d'installation automatique amorcée."`;
+	install_mencoder=`gksudo apt-get install mencoder | zenity --progress --pulsate --title "Installation de mencoder" --text "Installation en cours..." --auto-close`;
+	fi
+
+	# On s'assure que l'installation automatique de 'mencoder' a réussi
+	mencoder_exists2=`which mencoder | grep -c "mencoder"`
+	
+	# Si ce n'est pas le cas, on affiche une erreur et on quitte
+	if [ $mencoder_exists2 -eq 0 ]; then
+		zenity --error --title="Erreur détectée !" --text="ERREUR: La tentative d'installation automatique a échouée. Veuillez installer mencoder manuellement, à partir de votre terminal: sudo apt-get install mencoder";
+		exit;
+	fi
+
+	# On s'assure qu'un fichier est seléctionné
+	mime=`file -bi "$1"`;
+	correct_video="0";
+
+	# On s'assure que le fichier VIDEO est dans le bon format: ogv, flv, asf, mp4, m4v, avi, 3gp, bik, mov, mpg, dv, mkv, webm, ts, vob
+	## Liste des extensions vidéo
+	if echo "$1" | grep -q '.3gp'|| echo "$1" | grep -q '.3g2'; then
+		echo "File is in .3gp Format"
+		video_type="3gp"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mkv'|| echo "$1" | grep -q '.MKV'; then
+		echo "File is in .mkv Format"
+		video_type="mkv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.vob'|| echo "$1" | grep -q '.VOB'; then
+		echo "File is in .vob Format"
+		video_type="vob"
+		correct_video="1"
+	elif echo "$1" | grep -q '.webm'|| echo "$1" | grep -q '.WEBM'; then
+		echo "File is in .webm Format"
+		video_type="webm"
+		correct_video="1"
+	elif echo "$1" | grep -q '.ts'|| echo "$1" | grep -q '.TS'; then
+		echo "File is in .ts Format"
+		video_type="ts"
+		correct_video="1"
+	elif echo "$1" | grep -q '.ogv'|| echo "$1" | grep -q '.OGV'; then
+		echo "File is in .ogv Format"
+		video_type="ogv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.dv'|| echo "$1" | grep -q '.DV'; then
+		echo "File is in .dv Format"
+		video_type="dv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.flv'|| echo "$1" | grep -q '.FLV'; then
+		echo "File is in .flv Format"
+		video_type="flv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.asf' || echo "$1" | grep -q '.ASF'; then
+		echo "File is in .asf Format"
+		video_type="asf"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mp4'|| echo "$1" | grep -q '.MP4'; then
+		echo "File is in .mp4 Format"
+		video_type="mp4"
+		correct_video="1"
+	elif echo "$1" | grep -q '.m4v'|| echo "$1" | grep -q '.M4V'; then
+		echo "File is in .m4v Format"
+		video_type="m4v"
+		correct_video="1"
+	elif echo "$1" | grep -q '.avi'|| echo "$1" | grep -q '.AVI'; then
+		echo "File is in .avi Format"
+		video_type="avi"
+		correct_video="1"
+	elif echo "$1" | grep -q '.bik'|| echo "$1" | grep -q '.BIK'; then
+		echo "File is in .bik Format"
+		video_type="bik"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mov'|| echo "$1" | grep -q '.MOV'; then
+		echo "File is in .mov Format"
+		video_type="mov"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mpg'|| echo "$1" | grep -q '.MPG'; then
+		echo "File is in .mpg Format"
+		video_type="mpg"
+		correct_video="1"
+
+	elif [ $1 -eq 0 ]; then
+		zenity --error --title="Erreur" --text="Vous devez sélectionner un fichier vidéo..."
+		exit 1
+	elif [ $correct_video -eq 0 ]; then
+		zenity --error --title="Erreur - Format non supporté -" --text="Sélectionnez un fichier <b>ogv, flv, asf, mp4, m4v, avi, mkv, 3gp, bik, mov, mpg, dv, webm, ts, vob</b> valide."
+		exit 1
+	else
+		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+		exit 1
+	fi
+
+	# Si le format vidéo est correct, afficher les options suivantes
+	if [ $correct_video -eq "1" ]; then
+	do_encode="1";
+
+	# Encoder la vidéo
+	if [[ $do_encode -eq "1" ]]; then
+
+	# On demande à l'utilisateur le fichier des sous-titres
+	subtitle=`zenity --file-selection --title "Veuillez choisir le fichier contenant les sous-titres" --file-filter="Sous-titres | *.srt *.txt *.sub *.ass *.aqt *.dks *.lrc *.vkt *.scr *.pan *.mpl *.pjs *.psb *.ssa *.vsf"`;
+	if [ "$?" == 1 ] ; then exit 1
+	else
+	# On encode la vidéo en y ajoutant les sous-titres
+fbname=`basename "$subtitle"`
+
+	encode_video=`mencoder "$1" -sub "$subtitle" -utf8 -fontconfig -font Ubuntu \
+	-subfont-text-scale 3  -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1000 -o "titrée_$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de sous-titres en cours..." \
+	--text "Le fichier de sous-titres <b>$fbname</b> est incrusté dans la vidéo <b>$1</b>" --auto-close`;
+	# On affiche une notification
+	notify-send "Ajout de sous-titres" "Les sous-titres ont été incrustés dans $1 avec succès !";
+
+fi
+### FIN DU SCRIPT
+fi
+### FIN DU SCRIPT
+fi

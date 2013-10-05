@@ -1,0 +1,315 @@
+#!/bin/bash
+########################################################################
+#Script ajoutant un effet aux images sélectionnées
+#Nom du script: Ajouter un Effet v1.3
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de ImageMagick
+#Licence: GPL v3
+########################################################################
+version="v1.3"
+IFS="
+"
+	# On s'assure qu'au moins un fichier est sélectionné
+	mime=`file -bi "$1"`;
+	correct_format="0";
+	# On s'assure que ce fichier est dans le bon format
+	if echo "$1" | grep -q '.jpg'|| echo "$1" | grep -q '.JPG'; then
+		audio_type="jpg"
+		correct_format="1"
+	elif echo "$1" | grep -q '.jpeg'|| echo "$1" | grep -q '.JPEG'; then
+		audio_type="jpeg"
+		correct_format="1"
+	elif echo "$1" | grep -q '.png'|| echo "$1" | grep -q '.PNG'; then
+		audio_type="png"
+		correct_format="1"
+	elif echo "$1" | grep -q '.gif'|| echo "$1" | grep -q '.GIF'; then
+		audio_type="gif"
+		correct_format="1"
+
+	# On affiche une erreur si aucun fichier n'est seléctionné
+	elif [ $1 -eq 0 ]; then
+		zenity --error --title="Erreur" --text="Vous devez sélectionner au moins une image..."
+		exit 1
+	
+	# On affiche une erreur si ce fichier est dans un format non-supporté
+	elif [ $correct_video -eq 0 ]; then
+		zenity --error --title="Erreur - Format non supporté -" --text="Sélectionnez une ou plusieurs images au format <b>png, gif ou jpg</b> valide."
+		exit 1
+	
+	# On affiche une erreur si le script ne reconnait pas le fichier
+	else
+		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+		exit 1
+	fi
+
+	# Si le format du fichier est correct, on démarre l'opération
+	if [ $correct_format -eq "1" ]; then
+
+	# Menu Principal
+	option=`zenity --list --radiolist --width="535" --height="510" --title="Ajouter un effet aux images $version" --text="L'effet choisi sera appliqué à toutes les images sélectionnées." --column="Cocher" --column="Effet" --column="Description" \
+	TRUE "Contraster" "Accroit/Diminue le contraste" \
+	FALSE "Eclairer" "Augmente la luminosité" \
+	FALSE "Lueur douce" "Ajoute une lueur légère" \
+	FALSE "Crayon" "Effet de contours dessinés" \
+	FALSE "Sketch" "Dessin en pointillés et en couleurs" \
+	FALSE "Accentuer" "Accroit les contours" \
+	FALSE "Flouter" "Effet de flou sur toute l'image" \
+	FALSE "Pixéliser" "Effet de pixelisation" \
+	FALSE "Watermark" "Ajoute un texte/image personnelle" \
+	FALSE "Vignette" "Effet de halo centré" \
+	FALSE "Cadre transparent" "Bordure transparente et floue" \
+	FALSE "Polaroide" "Effet de photo en polaroide" \
+	FALSE "Négatif" "Inverse les couleurs" \
+	FALSE "Sépia" "Jaunit l'image" \
+	FALSE "Niveau de gris" "Grise l'image" \
+	FALSE "Monochrome" "Effet de pointillés noirs et blancs" `;\
+
+
+	# Option Accentuer selectionnée
+	if [ "$option" = "Accentuer" ]; then
+	# On crée le répertoire 'sharp'
+	mkdir sharp
+	# On démarre l'opération Accentuation
+	convert_sharp=`convert "$@" -sharpen 0x2 -enhance sharp/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Accentuation en cours..." \
+	--text "Application de l'effet <b>Accentuation</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Crayon selectionnée
+	if [ "$option" = "Crayon" ]; then
+	# On crée le répertoire 'crayon'
+	mkdir crayon
+	# On démarre l'opération Crayon
+	convert_crayon=`convert "$@" -colorspace gray -sketch 0x20+120 crayon/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Crayon en cours..." \
+	--text "Application de l'effet <b>Crayon</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Contraste selectionnée
+	if [ "$option" = "Contraster" ]; then
+	# On crée le répertoire 'contraste'
+	mkdir contraste
+	# L'utilisateur choisit ses préférences de contraste
+	contrast=$(zenity --scale --title="Choix du Contraste" --text "Définir le contraste (en %)" --value="35" --min-value="1" --max-value="100" --step="1")
+	# On démarre l'opération Contraste
+	convert_contraste=`convert $@ -sigmoidal-contrast 8x$contrast% contraste/$contrast%_$1 \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Contraste en cours..." \
+	--text "Application de l'effet Contraste sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Sketch selectionnée
+	if [ "$option" = "Sketch" ]; then
+	# On crée le répertoire 'sketch'
+	mkdir sketch
+	# On démarre l'opération Sketch
+	convert_sketch=`convert "$@" -sketch 5 sketch/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Sketch en cours..." \
+	--text "Application de l'effet <b>Sketch</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Watermark selectionnée
+	if [ "$option" = "Watermark" ]; then
+	# On crée le répertoire 'Watermark'
+	mkdir watermark
+	# Menu principal 
+	choix=`zenity --list --radiolist --width="560" --height="220" --title="Effet Watermark" --text="Choisir le type d'effet Watermark à ajouter à votre image." --column="Cocher" --column="Type" --column="Description" \
+	TRUE "Texte simple" "Affiche un texte personnalisé en bas de l'image" \
+	FALSE "Texte multiple" "Affiche le même texte plusieurs fois sur l'image" \
+	FALSE "Image externe" "Affiche une image personnelle en tant que Watermark" `;
+		
+	# Option Texte simple choisie
+	if [ "$choix" = "Texte simple" ]; then
+	text=`zenity --entry --title="Watermark - Texte simple -" --entry-text "copyright" --text="Entrez le texte de votre watermark, qui sera placé et centré au bas de l'image sélectionnée."`;
+	convert_texte=`convert -size 100x25 xc:none -gravity center -stroke black -strokewidth 2 -annotate 0 "$text" -channel RGBA -blur 0x3 -stroke none -fill white -annotate 0 "$text" +size "$@" +swap -gravity south -geometry +0-2 -composite watermark/"texte_$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Watermark en cours..." \
+	--text "Le Watermark en texte simple <b>$text</b> est appliqué sur l'image sélectionnée" --auto-close`;
+	fi
+	# Option Texte multiple choisie
+	if [ "$choix" = "Texte multiple" ]; then
+	text2=`zenity --entry --title="Watermark - Texte multiple -" --entry-text "copyright" --text="Entrez le texte de votre watermark, qui sera placé plusieurs fois sur votre image."`;
+	convert_textes=`convert -size 140x80 xc:none -fill grey -gravity NorthWest -draw "text 10,10 "$text2"" -gravity SouthEast -draw "text 5,15 "$text2"" miff:- | composite -tile - "$@" watermark/"textes_$@" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Watermark en cours..." \
+	--text "Le Watermark en texte multiple <b>$text2</b> est appliqué sur l'image sélectionnée" --auto-close`;
+	fi
+	# Option Image externe choisie
+	if [ "$choix" = "Image externe" ]; then
+	image=`zenity --file-selection --title "Veuillez choisir l'image servant de Watermark"  --file-filter="Images | *.png *.jpg *.gif"`;
+	convert_image=`composite -dissolve 25% -gravity south $image "$@"  watermark/"$image_$@" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Watermark en cours..." \
+	--text "Le Watermark à base de l'image <b>$image</b> est appliqué sur l'image sélectionnée" --auto-close`;
+	fi
+fi
+#########################""
+
+	# Option Négatif selectionnée
+	if [ "$option" = "Négatif" ]; then
+	# On crée le répertoire 'negatif'
+	mkdir negatif
+	# On démarre l'opération Negatif
+	convert_sketch=`convert "$@" -negate negatif/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Négatif en cours..." \
+	--text "Application de l'effet <b>Négatif</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Sépia selectionnée
+	if [ "$option" = "Sépia" ]; then
+	# On crée le répertoire 'sepia'
+	mkdir sepia
+	# On démarre l'opération Sepia
+	convert_sepia=`convert "$@" -sepia-tone 80%% sepia/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Sépia en cours..." \
+	--text "Application de l'effet <b>Sépia</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Gris selectionnée
+	if [ "$option" = "Niveau de gris" ]; then
+	# On crée le répertoire 'gris'
+	mkdir gris
+	# On démarre l'opération Gris
+	convert_gris=`convert "$@" -colorspace gray gris/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Niveau de gris en cours..." \
+	--text "Application de l'effet <b>Griser</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Monochrome selectionnée
+	if [ "$option" = "Monochrome" ]; then
+	# On crée le répertoire 'monochrome'
+	mkdir monochrome
+	# On démarre l'opération Monochrome
+	convert_monochrome=`convert "$@" -monochrome monochrome/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Monochrome en cours..." \
+	--text "Application de l'effet <b>Monochrome</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Flou selectionnée
+	if [ "$option" = "Flouter" ]; then
+	# On crée le répertoire 'flou'
+	mkdir flou
+	# On démarre l'opération Flou
+	convert_blur=`convert "$@" -blur 2x2 flou/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Flou en cours..." \
+	--text "Application de l'effet <b>Flou</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+fi
+#fi
+
+	# Option Pixel selectionnée
+	if [ "$option" = "Pixéliser" ]; then
+	# On crée le répertoire 'pixel'
+	mkdir pixel
+	# On démarre l'opération Pixel
+	convert_blur=`convert -scale 10% -scale 1000% "$@" -blur 2x2 pixel/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Pixel en cours..." \
+	--text "Application de l'effet <b>Pixel</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+fi
+#fi
+
+	# Option Arrondir selectionnée
+	if [ "$option" = "Vignette" ]; then
+	# On crée le répertoire 'vignette'
+	mkdir vignette
+	# On démarre l'opération Vignette
+	convert_vignette=`convert "$@" -background white -vignette 100x65000 vignette/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Vignette en cours..." \
+	--text "Application de l'effet <b>Vignette</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Eclairer selectionnée
+	if [ "$option" = "Eclairer" ]; then
+	# On crée le répertoire 'eclairer'
+	mkdir eclairage
+	# On démarre l'opération Eclairer
+	convert_eclairage=`convert "$@" -modulate 190,60 eclairage/$1 \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Eclairage en cours..." \
+	--text "Application de l'effet <b>Eclairage</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Galerie selectionnée
+	if [ "$option" = "Galerie de photos" ]; then
+	# On crée le répertoire 'galerie'
+	mkdir galerie
+	# On démarre l'opération Galerie
+	convert_galerie=`montage -label \"%f\" $@ -frame 5 -geometry 100x100 galerie/galerie.png \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Galerie de photos en cours..." \
+	--text "Application de l'effet <b>Galerie de photos</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Cadre selectionnée
+	if [ "$option" = "Cadre transparent" ]; then
+	# On crée le répertoire 'cadre'
+	mkdir cadre
+	# On démarre l'opération Cadre
+	convert_cadre=`convert "$1" \( +clone -blur 10x4 -fill white -colorize 30% \) \
+ \( -clone 0 -shave 30x30 -bordercolor white -border 1x1 \) \
+ -delete 0 -gravity center -composite \
+      cadre/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Cadre transparent en cours..." \
+	--text "Application de l'effet <b>Cadre transparent</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Lueur selectionnée
+	if [ "$option" = "Lueur douce" ]; then
+	# On crée le répertoire 'lueur'
+	mkdir lueur
+	# On démarre l'opération Lueur
+	sigma=`convert xc: -format "%[fx:0/3]" info:`
+	amount=`convert xc: -format "%[fx:1.5-1]" info:`
+	convert $1 \( +clone -evaluate multiply $amount -blur 0x$sigma \) \
+		-compose plus -composite lueur/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Lueur douce en cours..." \
+	--text "Application de l'effet <b>Lueur douce</b> sur l'images sélectionnée" --auto-close
+	# On affiche une notification informant de la conversion
+
+#fi
+fi
+
+	# Option Polaroide selectionnée
+	if [ "$option" = "Polaroide" ]; then
+	# On crée le répertoire 'polaroide'
+	mkdir polaroide
+	# On démarre l'opération Polaroide
+	convert_polar=`convert "$@" -gravity center -background black +polaroid polaroide/"$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Polaroide en cours..." \
+	--text "Application de l'effet <b>Polaroide</b> sur les images sélectionnées" --auto-close`;
+	# On affiche une notification informant de la conversion
+fi
+#fi
+fi

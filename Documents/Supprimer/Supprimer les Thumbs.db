@@ -1,0 +1,18 @@
+#!/bin/bash
+########################################################################
+#Script permettant de supprimer tous les fichiers 'résidus' Thumbs.db
+#Nom du script: Supprimer les Thumbs.db v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1: ?
+########################################################################
+version="v1.0"
+
+	# On cherche tous les fichiers Thumbs du répertoire courant
+	# On supprime ces fichiers sans ménagement
+find ./ -name Thumbs.db -delete
+
+notify-send "Suppression des fichiers Thumbs.db" "Tous les fichiers Thumbs.db du répertoire courant et de ses sous-dossiers ont été supprimés avec succès !"
+
+	

@@ -1,0 +1,269 @@
+#!/bin/bash
+########################################################################
+#Script convertissant les vidéos et musiques d'un format vers un autre
+#Nom du script: Convertir le(s) fichier(s) v1.2
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de avconv
+#Licence: GPL v3
+#À venir en v1.2: ?
+########################################################################
+version="v1.2" # ajout de plus de formats vidéo/audio en entrée et en sortie
+
+IFS="
+"
+
+########################################################################
+########################### PRÉ-REQUIS #################################
+	# On s'assure que 'avconv' est bien installé
+	avconv_exists=`which avconv | grep -c "avconv"`
+	# On s'assure que 'sox' est bien installé
+	sox_exists=`which sox | grep -c "sox"`
+
+	# On affiche une erreur si 'avconv' n'est pas installé
+	# On tente une installation automatique de 'avconv'
+	if [ $avconv_exists -eq 0 ]; then
+		avconv_error=`zenity --error --title="Erreur - Outil de conversion manquant !" --text="Vous devez installer le paquet avconv afin d'utiliser ce script.\n\nTentative d'installation automatique amorcée."`;
+		install_avconv=`gksudo apt-get install avconv | zenity --progress --pulsate --title "Installation de avconv" --text "Installation en cours..." --auto-close`;
+	fi
+	
+	# On s'assure que l'installation automatique de 'avconv' a réussi
+	avconv_exists2=`which avconv | grep -c "avconv"`
+	
+	# Si ce n'est pas le cas, on affiche une erreur et on quitte
+	if [ $avconv_exists2 -eq 0 ]; then
+		zenity --error --title="Erreur détectée !" --text="ERREUR: La tentative d'installation automatique a échouée. Veuillez installer avconv manuellement, à partir de votre terminal: sudo apt-get install avconv";
+		exit;
+	fi
+
+	# On affiche une erreur si 'sox' n'est pas installé
+	# On tente une installation automatique de 'sox'
+	if [ $sox_exists -eq 0 ]; then
+		sox_error=`zenity --error --title="Erreur - Outil de conversion manquant !" --text="Vous devez installer le paquet sox afin de convertir vers le format ogg.\n\nTentative d'installation automatique amorcée."`;
+		install_sox=`gksudo apt-get install sox | zenity --progress --pulsate --title "Installation de sox" --text "Installation en cours..." --auto-close`;
+	fi
+
+	# On s'assure que l'installation automatique de 'sox' a réussi
+	sox_exists2=`which sox | grep -c "sox"`
+
+	# Si ce n'est pas le cas, on affiche une erreur et on quitte
+	if [ $sox_exists2 -eq 0 ]; then
+		zenity --error --title="Erreur détectée !" --text="ERREUR: La tentative d'installation automatique a échouée. Veuillez installer sox manuellement, à partir de votre terminal: sudo apt-get install sox";
+		exit;
+	fi
+
+	# On s'assure qu'un fichier est seléctionné
+	mime=`file -bi "$1"`;
+	correct_video="0";
+
+	# On s'assure que le fichier VIDEO est dans le bon format: ogv, flv, asf, mp4, m4v, avi, 3gp, bik, mov, mpg, dv, mkv, webm, ts, vob
+	## Liste des extensions vidéo
+	if echo "$1" | grep -q '.3gp'|| echo "$1" | grep -q '.3g2'; then
+		echo "File is in .3gp Format"
+		video_type="3gp"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mkv'|| echo "$1" | grep -q '.MKV'; then
+		echo "File is in .mkv Format"
+		video_type="mkv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.vob'|| echo "$1" | grep -q '.VOB'; then
+		echo "File is in .vob Format"
+		video_type="vob"
+		correct_video="1"
+	elif echo "$1" | grep -q '.webm'|| echo "$1" | grep -q '.WEBM'; then
+		echo "File is in .webm Format"
+		video_type="webm"
+		correct_video="1"
+	elif echo "$1" | grep -q '.ts'|| echo "$1" | grep -q '.TS'; then
+		echo "File is in .ts Format"
+		video_type="ts"
+		correct_video="1"
+	elif echo "$1" | grep -q '.ogv'|| echo "$1" | grep -q '.OGV'; then
+		echo "File is in .ogv Format"
+		video_type="ogv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.dv'|| echo "$1" | grep -q '.DV'; then
+		echo "File is in .dv Format"
+		video_type="dv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.flv'|| echo "$1" | grep -q '.FLV'; then
+		echo "File is in .flv Format"
+		video_type="flv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.asf' || echo "$1" | grep -q '.ASF'; then
+		echo "File is in .asf Format"
+		video_type="asf"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mp4'|| echo "$1" | grep -q '.MP4'; then
+		echo "File is in .mp4 Format"
+		video_type="mp4"
+		correct_video="1"
+	elif echo "$1" | grep -q '.m4v'|| echo "$1" | grep -q '.M4V'; then
+		echo "File is in .m4v Format"
+		video_type="m4v"
+		correct_video="1"
+	elif echo "$1" | grep -q '.avi'|| echo "$1" | grep -q '.AVI'; then
+		echo "File is in .avi Format"
+		video_type="avi"
+		correct_video="1"
+	elif echo "$1" | grep -q '.bik'|| echo "$1" | grep -q '.BIK'; then
+		echo "File is in .bik Format"
+		video_type="bik"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mov'|| echo "$1" | grep -q '.MOV'; then
+		echo "File is in .mov Format"
+		video_type="mov"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mpg'|| echo "$1" | grep -q '.MPG'; then
+		echo "File is in .mpg Format"
+		video_type="mpg"
+		correct_video="1"
+
+	## Liste des extensions audio
+	elif echo "$1" | grep -q '.ogg'|| echo "$1" | grep -q '.OGG'; then
+		echo "File is in .ogg Format"
+		audio_type="ogg"
+		correct_audio="1"
+	elif echo "$1" | grep -q '.mp3'|| echo "$1" | grep -q '.MP3'; then
+		echo "File is in .mp3 Format"
+		audio_type="mp3"
+		correct_audio="1"
+	elif echo "$1" | grep -q '.m4a'|| echo "$1" | grep -q '.M4A'; then
+		echo "File is in .m4a Format"
+		audio_type="m4a"
+		correct_audio="1"
+	elif echo "$1" | grep -q '.flac'|| echo "$1" | grep -q '.FLAC'; then
+		echo "File is in .flac Format"
+		audio_type="flac"
+		correct_audio="1"
+	elif echo "$1" | grep -q '.wma' || echo "$1" | grep -q '.WMA'; then
+		echo "File is in .wma Format"
+		audio_type="wma"
+		correct_audio="1"
+	elif echo "$1" | grep -q '.wav'|| echo "$1" | grep -q '.WAV'; then
+		echo "File is in .wav Format"
+		audio_type="wav"
+		correct_audio="1"
+	elif echo "$1" | grep -q '.mid'|| echo "$1" | grep -q '.midi'; then
+		echo "File is in .mid Format"
+		audio_type="mid"
+		correct_audio="1"
+	elif echo "$1" | grep -q '.ra'|| echo "$1" | grep -q '.ram'; then
+		echo "File is in .ra Format"
+		audio_type="ra"
+		correct_audio="1"
+	elif echo "$1" | grep -q '.snd'|| echo "$1" | grep -q '.SND'; then
+		echo "File is in .snd Format"
+		audio_type="snd"
+		correct_audio="1"
+	elif [ $1 -eq 0 ]; then
+		zenity --error --title="Erreur" --text="Vous devez sélectionner un fichier audio ou vidéo..."
+		exit 1
+	elif [ $correct_video -eq 0 ]; then
+		zenity --error --title="Erreur - Format non supporté -" --text="Les formats vidéo supportés sont: <b>ogv, flv, asf, mp4, m4v, avi, mkv, 3gp, bik, mov, mpg, dv, webm, ts, vob</b>.\n\nLes formats audio supportés sont: <b>ogg, flac, mp3, wma</b>."
+		exit 1
+	else
+		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+		exit 1
+
+	fi
+
+########################################################################
+####################### FIN PRÉ-REQUIS #################################	
+	
+
+########################### ENCODAGE VIDEO #############################
+	# Si le format VIDEO est correct, afficher les options suivantes
+	if [ $correct_video -eq "1" ]; then
+	do_encode="0";
+
+	# Menu sélection du format de sortie (avi, flv, mov) 
+	option=`zenity --list --radiolist --width="430" --height="190" --title="Convertir la vidéo au format HTML5 $version" --text="Choisir un format dans lequel la vidéo <b>$1</b> sera convertie." --column="Cocher" --column="Option" --column="Description" \
+	TRUE "WEBM" "Convertir en WEBM/VP8 (sites web)" \
+	FALSE "OGV" "Convertir en OGG/THEORA (sites web)" \
+	FALSE "MP4" "Convertir en MP4/H264 (sites web)"`;
+	do_encode="1";
+
+	# Encoder la vidéo
+	if [[ $do_encode -eq "1" ]]; then
+
+	# Conversion vers format 'webm'
+	if [ "$option" = "WEBM" ]; then
+	encode_video=`avconv -i "$1" -b 1500k -vcodec libvpx -acodec libvorbis -ab 160000 -f webm -g 30 "$1".webm \
+	| zenity --progress --width="500" --pulsate --auto-close --title "Conversion en cours..." \
+	--text "Conversion de <b>"$1"</b> vers le format <b>WEBM (pour sites web)</b>."`;
+	fi
+
+	# Conversion vers format 'ogv'
+	if [ "$option" = "OGV" ]; then
+	encode_video=`avconv -i "$1" -b 1500k -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 "$1".ogv \
+	| zenity --progress --width="500" --pulsate --auto-close --title "Conversion en cours..." \
+	--text "Conversion de <b>"$1"</b> vers le format <b>OGV (pour sites web)</b>."`;
+	fi
+
+	# Conversion vers format 'mp4'
+	if [ "$option" = "MP4" ]; then
+	encode_video=`avconv -i "$1" -b 1500k -vcodec libx264 -pre:v main -g 30 "$1".mp4 \
+	| zenity --progress --width="500" --pulsate --auto-close --title "Conversion en cours..." \
+	--text "Conversion de <b>"$1"</b> vers le format <b>MP4 (pour sites web)</b>."`;
+	fi
+
+
+	# Afficher résultat de la conversion
+	if [[ $encode_video != 0 ]]; then
+	notify-send -i /usr/share/icons/Humanity/categories/48/applications-multimedia.svg "Conversion de la vidéo" "Conversion de $1 (vers le format $option) terminée !";
+	else
+	zenity --error --title "Erreur!" -- text "Echec de la conversion !";
+	fi
+fi
+fi
+
+########################## ENCODAGE AUDIO ##############################
+	# Si le format du fichier AUDIO est correct, on affiche les paramétrages de conversion
+	if [ $correct_audio -eq "1" ]; then
+	do_encode="1";
+filename=$(basename $1)
+extension=${filename##*.}
+filename=${filename%.*}
+	# On affiche le menu principal de conversions sonores
+	option=`zenity --list --radiolist --width="520" --height="215" --title="Conversion audio $version" --text="Vers quel format convertir le fichier audio <b>$1</b> ?" --column="Cocher" --column="Format" --column="Description" \
+	TRUE "Convertir en Mp3" "MP3 Qualité basique" \
+	FALSE "Convertir en Ogg" "OGG Qualité basique" \
+	FALSE "Convertir en Flac" "Très haute qualité" `;
+
+	# On peut alors commencer les encodages spécifiques
+	if [[ $do_encode -eq "1" ]]; then
+
+	# Conversion vers MP3...
+	if [ "$option" = "Convertir en Mp3" ]; then
+	encode_audio=`sox "$1" "$filename".mp3 \
+	| zenity --progress --width="500" --title "Conversion en cours..." \
+	--text "Conversion de <b>$1</b> vers le format <b>mp3 (qualité basique)</b>." --auto-close --pulsate --auto-kill`;
+		# On affiche une notification
+	notify-send -i /usr/share/icons/Humanity/categories/48/applications-multimedia.svg "Conversion en MP3" "Le fichier $1 a été converti en "$filename".mp3 avec succès !";
+fi
+
+	# Conversion vers OGG...
+	if [ "$option" = "Convertir en Ogg" ]; then
+	encode_audio=`sox "$1" "$filename".ogg \
+	| zenity --progress --width="500" --pulsate --title "Conversion en cours..." \
+	--text "Conversion de <b>$1</b> vers le format <b>ogg (qualité basique)</b>." --auto-close --auto-kill`;
+		# On affiche une notification
+	notify-send -i /usr/share/icons/Humanity/categories/48/applications-multimedia.svg "Conversion en OGG" "Le fichier $1 a été converti en "$filename".ogg avec succès !";
+fi
+
+	# Conversion vers FLAC...
+	if [ "$option" = "Convertir en Flac" ]; then
+	encode_audio=`avconv -i "$1" "$filename".flac \
+	| zenity --progress --width="500" --pulsate --title "Conversion en cours..." \
+	--text "Conversion de <b>$1</b> vers le format <b>flac (sans perte)</b>." --auto-close`;
+		# On affiche une notification
+	notify-send -i /usr/share/icons/Humanity/categories/48/applications-multimedia.svg "Conversion en FLAC" "Le fichier $1 a été converti en "$filename".flac avec succès !";
+fi
+
+fi
+
+	
+### FIN DU SCRIPT
+fi
+### FIN DU SCRIPT

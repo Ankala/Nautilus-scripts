@@ -1,0 +1,19 @@
+#!/bin/bash
+########################################################################
+#Script permettant de supprimer tous les fichiers d'un même format (dossier courant)
+#Nom du script: Suppression groupée v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1: ?
+########################################################################
+version="v1.0"
+
+	format=`zenity --entry --title="Suppression groupée $version" --entry-text="txt" --text="Veuillez entrer le format des fichiers à supprimer.\n\nAttention: Tous les fichiers (du répertoire courant et des sous-dossiers) du même format indiqué seront supprimés.\n\nexemple: odt, txt, png, doc, php, etc..."`;
+	if [ "$?" == 1 ] ; then exit 0 
+	else
+	delete=`find . -name "*.$format" -type f -delete | zenity --progress --pulsate --title "Suppression en cours..." --text "Tous les fichiers de type <b>$format</b> sont en cours de suppression." --auto-close`;
+	notify-send "Suppression groupée" "Les fichiers $format du répertoire courant ont été supprimés avec succès !"
+fi
+
+	

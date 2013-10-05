@@ -1,0 +1,48 @@
+#!/bin/bash
+########################################################################
+#Script permettant d'assembler plusieurs PDF en un seul
+#Nom du script: Assembler les PDF v1.1
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.3: ?
+########################################################################
+version="v1.2"	# Corrections sur les espaces dans les noms de fichiers
+IFS="
+"
+### On doit être sûr qu'un fichier est sélectionné
+	# Détection du fichier 
+	mime=`file -bi "$1"`;
+	correct_format="0";
+	
+	# On s'assure que le fichier est dans le bon format: pdf
+	if echo "$1" | grep -q '.pdf'|| echo "$1" | grep -q '.PDF'; then
+		echo "File is in .jpg Format"
+		format_type="pdf"
+		correct_format="1"
+	elif [ $1 -eq 0 ]; then
+		zenity --error --title="Erreur" --text="Vous devez sélectionner un fichier pdf..."
+		exit 1
+	elif [ $correct_format -eq 0 ]; then
+		zenity --error --title="Erreur - Format non supporté -" --text="Sélectionnez au moins un fichier au format <b>pdf</b> valide."
+		exit 1
+	else
+		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+		exit 1
+	fi
+	# On informe l'utilisateur de la suite des opérations
+	question=$(zenity --question --title="Assembler les PDF $version" --text "Vous êtes sur le point d'assembler tous les fichiers PDF <b>sélectionnés</b> en un seul fichier PDF.\n\n \
+Voulez-vous procéder à l'opération d'assemblage ?")
+
+	# S'il valide la fenêtre, on démarre l'opération d'assemblage des PDF
+	if [ "$?" == 0 ] ; then 
+	# Entrer le nom du fichier en sortie
+	nom=`zenity --entry --title="Nom du fichier PDF final" --entry-text "assemblage" --text="Entrez le nom du fichier final combinant tous les PDF sélectionnés. \n\nN'entrez aucun extension après le nom."`
+gs -q -sPAPERSIZE=a4 -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile="$nom".pdf $@ \
+	| zenity --progress --title "Assembler les PDF $version" --text "Les fichiers PDF sélectionnés sont en train d'être assemblés en <b>$nom.pdf</b>." --pulsate --auto-close \
+	| notify-send "Assembler les PDF" "Les PDF sélectionnés ont été assemblés en un fichier $nom.pdf !"
+
+	# S'il refuse, on quitte le script
+	else
+	exit 1
+fi

@@ -1,0 +1,125 @@
+#!/bin/bash
+########################################################################
+#Script adapté pour une utilisation sur toutes les images du dossier courant
+#Nom du script: Ajouter un Effet v1.2
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de ImageMagick
+#Licence: GPL v3
+########################################################################
+version="v1.2"
+
+# set default values
+mode="skew"
+angle="40"
+font="TimesNewRoman"
+pointsize="40"
+textcolor="black"
+bordercolor="black"
+undercolor="white"
+resize=100
+
+# set up temporary file
+tmp0="$dir/captcha_0_$$.miff"
+trap "rm -f $tmp0; exit 0" 0
+trap "rm -f $tmp0; exit 1" 1 2 3 15
+
+# compute random positions and orientations and characters
+xx1=`convert xc: -format "%[fx: -120 + sign(rand()-0.5)*floor(5*rand()+0.5)]" info:`
+xx2=`convert xc: -format "%[fx: -72 + sign(rand()-0.5)*floor(5*rand()+0.5)]" info:`
+xx3=`convert xc: -format "%[fx: -24 + sign(rand()-0.5)*floor(5*rand()+0.5)]" info:`
+xx4=`convert xc: -format "%[fx: 24 + sign(rand()-0.5)*floor(5*rand()+0.5)]" info:`
+xx5=`convert xc: -format "%[fx: 72 + sign(rand()-0.5)*floor(5*rand()+0.5)]" info:`
+xx6=`convert xc: -format "%[fx: 120 + sign(rand()-0.5)*floor(5*rand()+0.5)]" info:`
+yy1=`convert xc: -format "%[fx: sign(rand()-0.5)*floor(10*rand()+0.5)]" info:`
+yy2=`convert xc: -format "%[fx: sign(rand()-0.5)*floor(10*rand()+0.5)]" info:`
+yy3=`convert xc: -format "%[fx: sign(rand()-0.5)*floor(10*rand()+0.5)]" info:`
+yy4=`convert xc: -format "%[fx: sign(rand()-0.5)*floor(10*rand()+0.5)]" info:`
+yy5=`convert xc: -format "%[fx: sign(rand()-0.5)*floor(10*rand()+0.5)]" info:`
+yy6=`convert xc: -format "%[fx: sign(rand()-0.5)*floor(10*rand()+0.5)]" info:`
+rr1=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+rr2=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+rr3=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+rr4=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+rr5=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+rr6=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+ss1=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+ss2=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+ss3=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+ss4=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+ss5=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+ss6=`convert xc: -format "%[fx: sign(rand()-0.5)*floor($angle*rand()+0.5)]" info:`
+if [ "$mode" = "both" ]; then
+	or1="rotate $rr1 skewX $ss1"
+	or2="rotate $rr2 skewX $ss2"
+	or3="rotate $rr3 skewX $ss3"
+	or4="rotate $rr4 skewX $ss4"
+	or5="rotate $rr5 skewX $ss5"
+	or6="rotate $rr6 skewX $ss6"
+elif [ "$mode" = "skew" ]; then
+	or1="skewX $ss1"
+	or2="skewX $ss2"
+	or3="skewX $ss3"
+	or4="skewX $ss4"
+	or5="skewX $ss5"
+	or6="skewX $ss6"
+elif [ "$mode" = "rotate" ]; then
+	or1="rotate $rr1"
+	or2="rotate $rr2"
+	or3="rotate $rr3"
+	or4="rotate $rr4"
+	or5="rotate $rr5"
+	or6="rotate $rr6"
+fi
+
+chars="A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p q r s t u v w x y z 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9"
+charsArray=($chars)
+nchars=${#charsArray[*]}
+nchars1=`convert xc: -format "%[fx: $nchars - 1]" info:`
+pp1=`convert xc: -format "%[fx: floor($nchars1*rand()+0.5)]" info:`
+pp2=`convert xc: -format "%[fx: floor($nchars1*rand()+0.5)]" info:`
+pp3=`convert xc: -format "%[fx: floor($nchars1*rand()+0.5)]" info:`
+pp4=`convert xc: -format "%[fx: floor($nchars1*rand()+0.5)]" info:`
+pp5=`convert xc: -format "%[fx: floor($nchars1*rand()+0.5)]" info:`
+pp6=`convert xc: -format "%[fx: floor($nchars1*rand()+0.5)]" info:`
+cc1=${charsArray[$pp1]}
+cc2=${charsArray[$pp2]}
+cc3=${charsArray[$pp3]}
+cc4=${charsArray[$pp4]}
+cc5=${charsArray[$pp5]}
+cc6=${charsArray[$pp6]}
+fx=1.1
+fy=2
+bx1=`convert xc: -format "%[fx: 150 + $fx*$xx1]" info:`
+bx2=`convert xc: -format "%[fx: 150 + $fx*$xx2]" info:`
+bx3=`convert xc: -format "%[fx: 150 + $fx*$xx3]" info:`
+bx4=`convert xc: -format "%[fx: 150 + $fx*$xx4]" info:`
+bx5=`convert xc: -format "%[fx: 150 + $fx*$xx5]" info:`
+bx6=`convert xc: -format "%[fx: 150 + $fx*$xx6]" info:`
+by1=`convert xc: -format "%[fx: 40 + $fy*$yy1]" info:`
+by2=`convert xc: -format "%[fx: 40 + $fy*$yy2]" info:`
+by3=`convert xc: -format "%[fx: 40 + $fy*$yy3]" info:`
+by4=`convert xc: -format "%[fx: 40 + $fy*$yy4]" info:`
+by5=`convert xc: -format "%[fx: 40 + $fy*$yy5]" info:`
+by6=`convert xc: -format "%[fx: 40 + $fy*$yy6]" info:`
+
+convert -size 290x70 xc:$undercolor -bordercolor $bordercolor -border 5 \
+	-fill black -stroke $textcolor -strokewidth 1 -font $font -pointsize $pointsize \
+	-draw "translate ${xx1},${yy1} $or1 gravity center text 0,0 '$cc1'" \
+	-draw "translate ${xx2},${yy2} $or2 gravity center text 0,0 '$cc2'" \
+	-draw "translate ${xx3},${yy3} $or3 gravity center text 0,0 '$cc3'" \
+	-draw "translate ${xx4},${yy4} $or4 gravity center text 0,0 '$cc4'" \
+	-draw "translate ${xx5},${yy5} $or5 gravity center text 0,0 '$cc5'" \
+	-draw "translate ${xx6},${yy6} $or6 gravity center text 0,0 '$cc6'" \
+	-fill none -strokewidth 2 \
+	-draw "bezier ${bx1},${by1} ${bx2},${by2} ${bx3},${by3} ${bx4},${by4}" \
+	-draw "polyline ${bx4},${by4} ${bx5},${by5} ${bx6},${by6}" \
+	captcha.png
+	
+# resize if necessary
+if [ "$resize" != "100" ]; then
+	convert $tmp0 -resize ${resize}% $outfile
+else
+	convert $tmp0 $outfile
+fi
+exit 0

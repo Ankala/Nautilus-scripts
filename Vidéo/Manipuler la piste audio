@@ -1,0 +1,160 @@
+#!/bin/bash
+########################################################################
+#Script permettant d'ajouter/supprimer une bande sonore à une vidéo
+#Nom du script: Manipuler la piste audio v1.2
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de avconv
+#Licence: GPL v3
+#À venir en v1.2: ?
+########################################################################
+version="v1.2"	# Ajout de plus de formats audio/video
+
+	# On s'assure que 'avconv' est bien installé
+	avconv_exists=`which avconv | grep -c "avconv"`
+
+	# On affiche une erreur si 'avconv' n'est pas installé
+	# On tente une installation automatique de 'avconv'
+	if [ $avconv_exists -eq 0 ]; then
+		avconv_error=`zenity --error --title="Erreur - Outil de conversion manquant !" --text="Vous devez installer le paquet avconv afin d'utiliser ce script.\n\nTentative d'installation automatique amorcée."`;
+		install_avconv=`gksudo apt-get install avconv | zenity --progress --pulsate --title "Installation de avconv" --text "Installation en cours..." --auto-close`;
+	fi
+	
+	# On s'assure que l'installation automatique de 'avconv' a réussi
+	avconv_exists2=`which avconv | grep -c "avconv"`
+	
+	# Si ce n'est pas le cas, on affiche une erreur et on quitte
+	if [ $avconv_exists2 -eq 0 ]; then
+		zenity --error --title="Erreur détectée !" --text="ERREUR: La tentative d'installation automatique a échouée. Veuillez installer avconv manuellement, à partir de votre terminal: sudo apt-get install avconv";
+		exit;
+	fi
+
+	# On s'assure qu'un fichier est seléctionné
+	mime=`file -bi "$1"`;
+	correct_video="0";
+
+	# On s'assure que le fichier VIDEO est dans le bon format: ogv, flv, asf, mp4, m4v, avi, 3gp, bik, mov, mpg, dv, h264, webm, ts, vob
+	## Liste des extensions vidéo
+	if echo "$1" | grep -q '.3gp'|| echo "$1" | grep -q '.3g2'; then
+		echo "File is in .3gp Format"
+		video_type="3gp"
+		correct_video="1"
+	elif echo "$1" | grep -q '.h264'|| echo "$1" | grep -q '.H264'; then
+		echo "File is in .h264 Format"
+		video_type="h264"
+		correct_video="1"
+	elif echo "$1" | grep -q '.vob'|| echo "$1" | grep -q '.VOB'; then
+		echo "File is in .vob Format"
+		video_type="vob"
+		correct_video="1"
+	elif echo "$1" | grep -q '.webm'|| echo "$1" | grep -q '.WEBM'; then
+		echo "File is in .webm Format"
+		video_type="webm"
+		correct_video="1"
+	elif echo "$1" | grep -q '.ts'|| echo "$1" | grep -q '.TS'; then
+		echo "File is in .ts Format"
+		video_type="ts"
+		correct_video="1"
+	elif echo "$1" | grep -q '.ogv'|| echo "$1" | grep -q '.OGV'; then
+		echo "File is in .ogv Format"
+		video_type="ogv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.dv'|| echo "$1" | grep -q '.DV'; then
+		echo "File is in .dv Format"
+		video_type="dv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.flv'|| echo "$1" | grep -q '.FLV'; then
+		echo "File is in .flv Format"
+		video_type="flv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.asf' || echo "$1" | grep -q '.ASF'; then
+		echo "File is in .asf Format"
+		video_type="asf"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mp4'|| echo "$1" | grep -q '.MP4'; then
+		echo "File is in .mp4 Format"
+		video_type="mp4"
+		correct_video="1"
+	elif echo "$1" | grep -q '.m4v'|| echo "$1" | grep -q '.M4V'; then
+		echo "File is in .m4v Format"
+		video_type="m4v"
+		correct_video="1"
+	elif echo "$1" | grep -q '.avi'|| echo "$1" | grep -q '.AVI'; then
+		echo "File is in .avi Format"
+		video_type="avi"
+		correct_video="1"
+	elif echo "$1" | grep -q '.bik'|| echo "$1" | grep -q '.BIK'; then
+		echo "File is in .bik Format"
+		video_type="bik"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mov'|| echo "$1" | grep -q '.MOV'; then
+		echo "File is in .mov Format"
+		video_type="mov"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mpg'|| echo "$1" | grep -q '.MPG'; then
+		echo "File is in .mpg Format"
+		video_type="mpg"
+		correct_video="1"
+	elif [ $1 -eq 0 ]; then
+		zenity --error --title="Erreur" --text="Vous devez sélectionner un fichier vidéo..."
+		exit 1
+	elif [ $correct_video -eq 0 ]; then
+		zenity --error --title="Erreur - Format non supporté -" --text="Sélectionnez un fichier <b>ogv, flv, asf, mp4, m4v, avi, mkv, 3gp, bik, divx, mov, mpg, dv, h264, webm, ts, vob</b> valide."
+		exit 1
+	else
+		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+		exit 1
+	fi
+
+	# Si le format vidéo est correct, afficher les options suivantes
+	if [ $correct_video -eq "1" ]; then
+	do_encode="0";
+	# Menu principal
+	option=`zenity --list --radiolist --width="200" --height="200" --title="Ajouter/Supprimer une bande sonore $version" --column="Cocher" --column="Option" \
+	TRUE "Supprimer la bande sonore" \
+	FALSE "Ajouter une bande sonore" \
+	FALSE "Extraire la bande sonore"`;
+
+	if [ "$option" = "Ajouter une bande sonore" ]; then
+	# On demande à l'utilisateur de choisir un fichier audio comme bande son
+	SelectedFile=`zenity --file-selection --title "Veuillez choisir la bande sonore" --file-filter="Fichiers audio | *.ogg *.mp3 *.flac *.wma *.wav *.snd *.ra *.m4a *.mid"`
+	if [ "$?" == 1 ] ; then exit 0
+	fi
+	
+	# Si aucun fichier n'est seléctionné, renvoyer une erreur et quitter
+	if [ "$SelectedFile" = "" ]; then
+	if [ $# != 1 ]; then
+  zenity --error --text="Vous devez choisir un fichier pour la bande sonore !"
+  exit 0
+	fi
+	fi
+	# Si le fichier seléctionné est vide, renvoyer une erreur et quitter
+	if [ `stat --printf="%s" "$SelectedFile"` = "0" ]; then
+ zenity --warning --text="Le fichier <b>$SelectedFile</b> est vide !"
+ exit 0
+	fi
+
+	# On démarre les opérations d'encodage
+	enc=`avconv -i "$1" -i "$SelectedFile" -acodec copy -vcodec copy "bande-sonore_$1" | zenity --progress --pulsate --title "Ajout de bande sonore" --text "Le fichier audio <b>$SelectedFile</b> en cours d'incorporation dans <b>$1</b>." --auto-close`
+	notify-send -i /usr/share/icons/Humanity/apps/48/audio-player.svg "Ajout d'une bande sonore" "La bande sonore $SelectedFile a été correctement ajoutée à la vidéo $1 !";
+fi
+fi
+
+	if [ "$option" = "Extraire la bande sonore" ]; then
+	extrait=`avconv -i "$1" -vn -ac 2 -ar 44100 -ab 192k -f mp3 "$1".mp3 \
+	| zenity --progress --width="500" --pulsate --title "Extraction en cours..." \
+	--text "Extraction audio de <b>$1</b> vers le format <b>mp3</b>." --auto-close`
+	notify-send -i /usr/share/icons/Humanity/apps/48/audio-player.svg "Extraction en MP3" "Le son de la vidéo $1 a été correctement extrait !";
+fi
+
+
+	if [ "$option" = "Supprimer la bande sonore" ]; then
+	encodage=`avconv -i "$1" -an -vcodec copy "muet_$1" | zenity --progress --pulsate --title "Suppression de bande sonore" --text "Suppression de la bande sonore de <b>$1</b> en cours..." --auto-close`;
+
+	# Afficher résultat de la conversion
+	if [[ $encode_video != 0 ]]; then
+	notify-send -i /usr/share/icons/Humanity/apps/48/audio-player.svg "Suppression de la bande sonore" "Suppression de la bande sonore de $1 terminée !";
+	else
+	zenity --error --title "Erreur!" -- text "Echec du réencodage !";
+fi
+fi

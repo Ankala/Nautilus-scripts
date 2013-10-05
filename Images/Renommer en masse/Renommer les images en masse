@@ -1,0 +1,58 @@
+#!/bin/bash
+########################################################################
+#Script permettant de renommer toutes les images d'un dossier
+#Nom du script: Renommer les images en masse v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1:
+########################################################################
+version="v1.0"
+
+IFS="
+"
+
+let "indice=1"
+
+	# Menu Principal
+option=$(zenity --list --radiolist --width="480" --height="180" --title="Renommer les images en masse $version" --column="Cocher" --column="Mode" --column="Description" \
+TRUE "Numérique" "Renomme les images en 1.jpg, 2.jpg etc..." \
+FALSE "Personnalisé" "Ajoute un nom avant chaque image")
+
+	# Option Numérique
+	if [ "$option" = "Numérique" ]; then
+	numérique=$(zenity --question --title="Renommer les images en masse $version" --text="Toutes les images de ce dossier seront renommées numériquement, quelle que soit leur extension (png, jpg, etc...).\n\nPar exemple, pour des images au format PNG: 1.png, 2.png, 3.png, et ainsi de suite.\n\nVoulez-vous procéder au renommage numérique ?")
+	if [ "$?" == 1 ] ; then exit 1
+	else
+for fichier in *.jpg *.gif *.png *.jpeg *.JPG *.JPEG *.GIF;
+do
+            if [ -f "$fichier" ]; then
+            extension=${fichier##*.}
+            echo "$fichier" "=>" "$nom-$indice.$extension"
+            mv "$fichier" `printf "%02d" $indice`".$extension"
+            let "indice+=1"
+        fi
+done
+fi
+fi
+
+	# Option Personnalisé
+	if [ "$option" = "Personnalisé" ]; then
+	custom=$(zenity --question --title="Renommer les images en masse $version" --text="Toutes les images de ce dossier seront renommées selon votre convenance, quelle que soit leur extension (png, jpg, etc...).\n\nPar exemple: fichier-1.png, fichier-2.png, fichier-3.png, et ainsi de suite.\n\nVoulez-vous procéder au renommage alphanumérique ?")
+	if [ "$?" == 1 ] ; then exit 1
+	else
+	nom=$(zenity --entry --title="Renommer les images en masse $version" --entry-text="fichier" --text="Entrez le préfixe commun à chaque image. La numérotation s'y ajoutera automatiquement.\n\nPar exemple: fichier-1.png, fichier-2.png, fichier-3.png, et ainsi de suite.")
+	if [ "$?" == 1 ] ; then return 1
+	else
+for fichier in *.jpg *.gif *.png *.jpeg *.JPG *.JPEG *.GIF;
+do
+            if [ -f "$fichier" ]; then
+            extension=${fichier##*.}
+            echo "$fichier" "=>" "$nom-$indice.$extension"
+            mv "$fichier" "$nom-"`printf "%02d" $indice`".$extension"
+            let "indice+=1"
+        fi
+done
+fi
+fi
+fi

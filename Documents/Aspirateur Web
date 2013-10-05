@@ -1,0 +1,60 @@
+#!/bin/bash
+########################################################################
+#Script permettant d'aspirer tout un site web ou une partie de son contenu
+#Nom du script: Aspirateur Web v1.1
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.2: ?
+########################################################################
+version="v1.1"
+
+	# Menu principal 
+	option=`zenity --list --radiolist --width="520" --height="240" --title="Aspirateur Web $version" --text="Choisir une action à effectuer" --column="Cocher" --column="Action" --column="Description" \
+	TRUE "Site Web" "Aspire un site web complet" \
+	FALSE "Images" "Télécharge uniquement les images d'un site" \
+	FALSE "PDF" "Télécharge uniquement les fichiers PDF d'un site" \
+	FALSE "Archive seule" "Télécharge une archive compressée" `;
+
+	# Option Images
+	if [ "$option" = "Images" ]; then
+	imgurl=`zenity --entry --title="Aspiration d'images d'un site web" --text="Entrez l'adresse (URL) du site d'où seront téléchargées les images. \n\nexemple: http://www.ubuntu.com/" --entry-text="http://www.ubuntu.com/"`
+	if [ "$?" == 1 ] ; then exit 1
+	else
+	aspireimg=`wget -r -l1 --no-parent robots=off -nH -nd -A".jpg,.png" "$imgurl" \
+	| zenity --progress --title "Aspiration des images en cours..." --text "Aspiration des images de <b>$imgurl</b> en cours..." --pulsate`;
+	rm robots.txt
+fi
+fi
+	# Option Site Web
+	if [ "$option" = "Site Web" ]; then
+	url=`zenity --entry --title="Aspiration de site web" --text="Entrez l'adresse (URL) du site à télécharger. \n\nexemple: http://www.ubuntu.com/" --entry-text="http://www.ubuntu.com/"`
+	if [ "$?" == 1 ] ; then exit 1
+	else
+	aspire=`wget --random-wait -r -p -k -e robots=off -U mozilla "$url" \
+	| zenity --progress --title "Aspiration de site web en cours..." --text "Aspiration de <b>$url</b> en cours..." --pulsate`;
+	rm robots.txt
+	fi
+fi
+
+	# Option PDF
+	if [ "$option" = "PDF" ]; then
+	pdfurl=`zenity --entry --title="Aspiration des fichiers PDF" --text="Entrez l'adresse (URL) du site d'où seront téléchargés les PDF. \n\nexemple: http://www.ubuntu.com/" --entry-text="http://www.ubuntu.com/"`
+	if [ "$?" == 1 ] ; then exit 1
+	else
+	aspirepdf=`wget -r -l1 --no-parent robots=off -nH -nd -A".pdf" "$pdfurl" \
+	| zenity --progress --title "Aspiration des fichiers PDF en cours..." --text "Aspiration des PDF de <b>$pdfurl</b> en cours..." --pulsate`;
+	rm robots.txt
+	fi
+fi
+
+	# Option Archive seule
+	if [ "$option" = "Archive seule" ]; then
+	tarurl=`zenity --entry --title="Aspiration d'une archive compressée" --text="Entrez l'adresse (URL) complète de l'archive à télécharger. \n\nexemple: http://www.ubuntu.com/archive.tar.bz2" --entry-text=""`
+	if [ "$?" == 1 ] ; then exit 1
+	else
+	aspiretar=`wget -t2 "$tarurl" \
+	| zenity --progress --title "Téléchargement de l'archive en cours..." --text "Téléchargement de l'archive de <b>$tarurl</b> en cours..." --pulsate`;
+	rm robots.txt
+	fi
+fi

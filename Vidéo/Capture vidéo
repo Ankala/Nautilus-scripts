@@ -1,0 +1,44 @@
+#!/bin/bash
+########################################################################
+#Script capturant la vidéo (screencast)
+#Nom du script: Capture vidéo v1.2
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de FFMPEG/AVCONV
+#Licence: GPL v3
+#À venir en v1.3: ?
+########################################################################
+version="v1.2"	# Corrections de bugs mineurs
+
+	# On demande la durée de l'enregistrement, en minutes
+	duree=`zenity --entry --title="Capture vidéo $version" --entry-text "00:01:00" --text="Définir la durée de l'enregistrement vidéo. \n\nPar exemple, 00:05:10 correspond à une durée de 5 minutes et 10 secondes."`
+
+	# Si l'utilisateur annule, on quitte le script
+	if [ "$?" == 1 ] ; then exit 1
+	else
+	# Sinon, on demande le nom du fichier final
+	nom=`zenity --entry --title="Capture vidéo $version" --entry-text "capture_vidéo" --text="Entrez le nom du fichier contenant l'enregistrement final. \n\nN'ajoutez aucune extension au nom du fichier (avi, mp4, etc...)."`
+fi
+	# Si l'utilisateur annule, on quitte le script
+	if [ "$?" == 1 ] ; then exit 1
+	else
+	# Sinon, on récupère la résolution du plein-écran, on démarre l'enregistrement, puis on affiche une notification à la fin
+dimensions=`xdpyinfo | grep 'dimensions:' | head -1 | \
+  sed -e 's/^.* \([0-9]\+x[0-9]\+\) pixels.*$/\1/'`
+
+avconv -f x11grab \
+  -r 30 -s $dimensions -i :0.0 \
+  -f alsa -ac 2 -i pulse \
+  -vcodec libx264 -pre:v lossless_ultrafast \
+  -acodec libmp3lame \
+  -t $duree -y $nom.avi
+fi
+	notify-send -i /usr/share/icons/Humanity/apps/48/gnome-sound-recorder.svg "Capture vidéo" "La capture vidéo a été correctement enregistrée sous le nom $nom.avi !"
+
+	# On demande à ouvrir l'image générée dans 'Totem'
+	question=$(zenity --question --title="Lecture de la capture vidéo" --text "Voulez-vous ouvrir l'enregistrement vidéo <b>$nom.avi</b> avec le lecteur <b>Totem</b> ?" --ok-label="Ouvrir avec Totem" \ --cancel-label="Ne pas ouvrir")
+	if [ "$?" == 1 ] ; then exit 1
+	else
+	# Sinon, on ouvre l'image dans Totem
+	totem $nom.avi
+fi

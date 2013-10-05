@@ -1,0 +1,25 @@
+#!/bin/bash
+########################################################################
+#Script permettant de tuer un processus bloqué/récalcitrant
+#Nom du script: Terminer le processus v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1:
+########################################################################
+version="v1.0"
+IFS="
+"
+
+ MYFILE=$(readlink -f "$1") 
+ shift 
+ for i in $@; do MYFILE="$MYFILE $i"; done 
+ MYBASENAME=$(basename "$( readlink -f "$MYFILE")") 
+ 
+ wrestool -x -t 14 "$MYFILE" > "/tmp/$MYBASENAME.ico" 
+
+ convert -alpha on "/tmp/$MYBASENAME.ico" "/tmp/$MYBASENAME.png" 
+
+ #  On ne choisit que l'icône la plus grande 
+ echo Copy "$(ls -S -1 "/tmp/$MYBASENAME"*".png" | tac | tail -n 1)" to "$MYFILE.icone.png" ... 
+ cp "$(ls -S -1 "/tmp/$MYBASENAME"*".png" | tac | tail -n 1)" "$MYFILE.icone.png" 

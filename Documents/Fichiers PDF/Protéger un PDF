@@ -1,0 +1,51 @@
+#!/bin/bash
+########################################################################
+#Script permettant de protéger un fichier PDF en écriture (copier/coller impossible)
+#Nom du script: Protéger un PDF v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1:
+########################################################################
+version="v1.0"
+IFS="
+"
+
+	# On s'assure qu'un fichier est seléctionné
+	mime=`file -bi "$1"`;
+	correct_format="0";
+
+	# On s'assure que ce fichier est dans le bon format; pdf
+	if echo "$1" | grep -q '.pdf'|| echo "$1" | grep -q '.PDF'; then
+		echo "File is in .pdf Format"
+		format_type="pdf"
+		correct_format="1"
+	elif [ $1 -eq 0 ]; then
+		zenity --error --title="Erreur" --text="Vous devez sélectionner un fichier PDF..."
+		exit 1
+	elif [ $correct_format -eq 0 ]; then
+		zenity --error --title="Erreur - Format non supporté -" --text="Sélectionnez un fichier <b>pdf</b> valide."
+		exit 1
+	else
+		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+		exit 1
+	fi
+
+	# Si le format du fichier est correct, on affiche la compression
+	if [ $correct_format -eq "1" ]; then
+	# On informe l'utilisateur de la suite des opérations
+	question=$(zenity --question --title="Protéger un PDF $version" --text "Vous êtes sur le point de protéger le fichier PDF <b>$1</b> sélectionné.\n\n \
+Ce fichier sera modifié afin de rendre les fonctions <b>copier/coller</b> et <b>imprimer</b> inactives. Néanmoins, le fichier d'origine <b>sera conservé</b> !\n\n \
+Voulez-vous protéger ce fichier PDF ?")
+
+	# S'il valide la fenêtre, on démarre l'opération de compression du PDF
+	if [ "$?" == 0 ] ; then 
+gs -DNOPAUSE -q -sDEVICE=pdfwrite -dEncryptionR=3 -dKeyLength=40 -dPermissions=65472 -sOwnerPassword=null -sOutputFile="protégé_$1" -f $1
+notify-send "Protection du PDF" "Le fichier $1 a été protégé avec succès !\nLa version protégée du fichier est: "protégé_$1""
+
+	# S'il refuse, on quitte le script
+	else
+	exit 1
+
+fi
+fi

@@ -1,0 +1,50 @@
+#!/bin/bash
+########################################################################
+#Script permettant de compresser un ou plusieurs fichiers, de le découper et/ou de le recoller
+#Nom du script: Compresser & Recoller v1.1
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.2: ?
+########################################################################
+version="v1.1"	# Corrections bugs mineurs
+
+IFS="
+"
+
+	# On s'assure qu'au moins un fichier est seléctionné
+	mime=`file -bi "$1"`;
+
+	# Menu Principal
+option=$(zenity --list --radiolist --title="Compresser & Découper $version" --column="Cocher" --column="Option" \
+TRUE "Compresser & Découper" \
+FALSE "Recoller l'archive")
+
+	# Option Compresser et Découper
+	if [ "$option" = "Compresser & Découper" ]; then
+	taille=$(zenity --entry --title="Compresser & Découper $version" --entry-text="200" --text="Veuillez entrer la taille des parties souhaitées en Megaoctets.\n\nFichier à découper: $1\n\nexemple: 350 (Mo)")
+	if [ "$?" == 1 ] ; then exit 1
+	else
+tar -cvj $1 | split -b "$taille"m -d - "$1.tar.bz." \
+| zenity --progress --width="500" --pulsate --auto-close --title "Compression en cours..." \
+--text "Compression de <b>$1</b> en <b>"$1".tar.bz</b>.\nTaille des parties à créer: <b>$taille</b> Mo."
+	notify-send "Compression & Découpage" "Le fichier $1 a été découpé en parties de $taille Mo avec succès !"
+fi
+fi
+
+	# Option Recoller et Décompresser
+	if [ "$option" = "Recoller l'archive" ]; then
+	# Enlever l'extension .00 du nom de l'archive
+NB_CHAMPS=$(echo $1 | awk -F"." '{ print NF-1 }')
+CHAMPS="1"
+for i in `seq 2 $NB_CHAMPS`; do
+CHAMPS=$CHAMPS",$i";
+done;
+final=$(echo $1 | cut -d "." -f ${CHAMPS})
+
+	# On recolle puis décompresse directement
+cat "$final"* | tar -xvj \
+| zenity --progress --width="500" --pulsate --auto-close --title "Recollage en cours..." \
+--text "L'archive <b>$1</b> est en train d'être recollée et directement décompressée.\nLa durée de l'opération dépend de la taille des parties découpées."
+notify-send "Recollage de l'archive" "Les parties de l'archive $1 ont été recollées avec succès !"
+fi

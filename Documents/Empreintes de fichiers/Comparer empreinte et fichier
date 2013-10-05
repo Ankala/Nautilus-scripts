@@ -1,0 +1,110 @@
+#!/bin/bash
+########################################################################
+#Script permettant de comparer un fichier avec son empreinte MD5, SHA ou CRC
+#Nom du script: Comparer fichier et empreinte v1.1
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.2: ?
+########################################################################
+version="v1.1"
+IFS="
+"
+# On vérifie qu'aucun dossier n'a été selectionné
+for File in "$@"
+do
+if [ -d "$File" ]; then
+zenity --error --text="<b>$File</b> est un dossier.
+Impossible de générer une empreinte sur un dossier."
+exit
+fi
+done
+
+	# Menu Principal
+	compare=`zenity --list --radiolist --width="560" --height="230" --title="Comparer un fichier et son empreinte $version" --text="Choisir un type de comparaison" --column="Cocher" --column="Mode" --column="Description" \
+	TRUE "Comparaison MD5" "Comparer un fichier et son empreinte MD5" \
+	FALSE "Comparaison CRC" "Comparer un fichier et son empreinte CRC" \
+	FALSE "Comparaison SHA1" "Comparer un fichier et son empreinte SHA1" \
+	FALSE "Comparaison SHA256" "Comparer un fichier et son empreinte SHA256" `;
+
+	### SOUS-MENU MD5
+	if [ "$compare" = "Comparaison MD5" ]; then
+FILE=`zenity --file-selection --title "Veuillez choisir le FICHIER SOURCE"`
+Sum1=`md5sum $FILE | awk '{print $1}'`
+
+fullfilename=$(basename $FILE)
+
+HASH=`zenity --file-selection --title "Veuillez choisir l'empreinte MD5 du fichier"`
+Sum2=`awk '{print $1}' "$HASH"` 
+
+fullfilename1=$(basename $HASH)
+
+if [ "$Sum1" == "$Sum2" ]; then
+  # Montrer la notification de réussite
+  zenity --info --title="Comparaison du md5" --text="<b>SUCCES !</b>\n\nL'empreinte <b>$fullfilename1</b> correspond bien au fichier <b>$fullfilename</b> !"
+else
+  zenity --warning --title="Comparaison du md5" --text="<b>ERREUR !</b>\n\nL'empreinte <b>$fullfilename1</b> ne correspond pas au fichier <b>$fullfilename</b> !"
+  exit 1
+fi
+fi
+
+
+	### SOUS-MENU CRC
+if [ "$compare" = "Comparaison CRC" ]; then
+FILE=`zenity --file-selection --title "Veuillez choisir le FICHIER SOURCE"`
+Sum1=`cksum $FILE | awk '{print $1}'`
+
+fullfilename=$(basename $FILE)
+HASH=`zenity --file-selection --title "Veuillez choisir l'empreinte CRC du fichier"`
+Sum2=`cat $HASH | awk '{print $1}'` 
+fullfilename1=$(basename $HASH)
+
+if [ "$Sum1" == "$Sum2" ]; then
+  # Montrer la notification de réussite
+  zenity --info --title="Comparaison du crc" --text="<b>SUCCES !</b>\n\nL'empreinte <b>$fullfilename1</b> correspond bien au fichier <b>$fullfilename</b> !"
+else
+  zenity --warning --title="Comparaison du crc" --text="<b>ERREUR !</b>\n\nL'empreinte <b>$fullfilename1</b> ne correspond pas au fichier <b>$fullfilename</b> !"
+  exit 1
+fi
+fi
+
+	### SOUS-MENU SHA1
+if [ "$compare" = "Comparaison SHA1" ]; then
+FILE=`zenity --file-selection --title "Veuillez choisir le FICHIER SOURCE"`
+Sum1=`sha1sum $FILE | awk '{print $1}'`
+
+fullfilename=$(basename $FILE)
+HASH=`zenity --file-selection --title "Veuillez choisir l'empreinte SHA1 du fichier"`
+Sum2=`cat $HASH | awk '{print $1}'` 
+fullfilename1=$(basename $HASH)
+
+if [ "$Sum1" == "$Sum2" ]; then
+  # Montrer la notification de réussite
+  zenity --info --title="Comparaison du sha1" --text="<b>SUCCES !</b>\n\nL'empreinte <b>$fullfilename1</b> correspond bien au fichier <b>$fullfilename</b> !"
+else
+  zenity --warning --title="Comparaison du sha1" --text="<b>ERREUR !</b>\n\nL'empreinte <b>$fullfilename1</b> ne correspond pas au fichier <b>$fullfilename</b> !"
+  exit 1
+fi
+fi
+
+	### SOUS-MENU SHA256
+if [ "$compare" = "Comparaison SHA256" ]; then
+FILE=`zenity --file-selection --title "Veuillez choisir le FICHIER SOURCE"`
+Sum1=`sha256sum $FILE | awk '{print $1}'`
+
+fullfilename=$(basename $FILE)
+HASH=`zenity --file-selection --title "Veuillez choisir l'empreinte SHA1 du fichier"`
+Sum2=`cat $HASH | awk '{print $1}'` 
+fullfilename1=$(basename $HASH)
+
+if [ "$Sum1" == "$Sum2" ]; then
+  # Montrer la notification de réussite
+  zenity --info --title="Comparaison du sha256" --text="<b>SUCCES !</b>\n\nL'empreinte <b>$fullfilename1</b> correspond bien au fichier <b>$fullfilename</b> !"
+else
+  zenity --warning --title="Comparaison du sha256" --text="<b>ERREUR !</b>\n\nL'empreinte <b>$fullfilename1</b> ne correspond pas au fichier <b>$fullfilename</b> !"
+  exit 1
+fi
+fi
+### Fin
+fi
+### Fin

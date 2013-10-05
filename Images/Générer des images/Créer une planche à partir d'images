@@ -1,0 +1,43 @@
+#!/bin/bash
+########################################################################
+#Script permettant de répéter plusieurs fois l'image selon une résolution prédeterminée
+#Nom du script: Créer une planche à partir d'images v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de ImageMagick
+#Licence: GPL v3
+#À venir en v1.1: Plus d'options ?
+########################################################################
+version="v1.0"
+IFS="
+"
+
+	# Écran de bienvenue, informations du script
+	menu=`zenity --info --width="220" --height="155" --title="Créer une planche à partir d'images $version" --text="Ce script permet au choix de créer une nouvelle image, avec résolution prédéfinie, qui contiendra plusieurs fois l'image sélectionnée (planche personnalisée).\n\nOu bien d'assembler les images sélectionnées dans une planche du style des bandes dessinées verticales (une seule colonne)."`;
+
+	# Menu principal
+	option=`zenity --list --radiolist --width="570" --height="200" --title="Créer une planche à partir d'images $version" --column="Cocher" --column="Option" --column="Description" \
+	FALSE "Planche verticale" "Planche à 1 colonne (bande dessinée verticale)" \
+	TRUE "Planche personnalisée" "Planche aux dimensions modifiables" `;
+	
+	if [ "$option" = "Planche personnalisée" ]; then
+	# Ouvrir l'image source
+	image=`zenity --file-selection --title "Veuillez choisir l'image source" --file-filter="Fichiers image | *.png *.jpg *.gif"`
+	# Si l'utilisateur annule, on quitte le script
+	if [ "$?" == 1 ] ; then exit ; fi
+	# Paramétrer la résolution de l'image finale (conteneur)
+  	checksize=`zenity --entry --title="Créer une planche à partir d'images $version" --entry-text "2000x2000" --text="L'image finale sera enregistrée dans le répertoire courant. \n\nVous pouvez modifier la taille (résolution) de cette image.\n\nexemple: 640x480 ou 1280x1024"`
+	# Si l'utilisateur annule, on quitte le script
+	if [ "$?" == 1 ] ; then exit ; fi
+	# Lancer l'opération
+	composite -tile "$image" -size "$checksize" xc:none $checksize.png
+	notify-send "Planche personnalisée" "L'image $image a été insérée plusieurs fois dans l'image conteneur "$checksize.png"";
+fi
+
+	if [ "$option" = "Planche verticale" ]; then
+	# Lancer l'opération
+	montage -mode concatenate -tile 1x $@ "vertical_$1"
+	notify-send "Planche verticale" "Les images sélectionnées ont été insérées verticalement dans l'image finale (1 colonne)";
+fi
+
+done

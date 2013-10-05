@@ -1,0 +1,30 @@
+#!/bin/bash
+########################################################################
+#Script installant tous les paquets essentiels aux scripts
+#Nom du script: Installation des dépendances v1.0
+#Auteur: Astohan
+#Licence: GPL v3
+#À venir en v1.1:
+########################################################################
+version="v1.0"
+
+info=`zenity --question --width="500" --height="400" --title="Installation des dépendances $version" \
+--text="Afin de pouvoir utiliser certains des scripts de l'archive, vous <b>devez</b> installer les paquets dont ils dépendent.\n\n \
+À ce jour, les paquets qui vont être installés sont les suivants:\n\n \
+<span color=\"blue\"><b><u>Multimédia</u></b></span>\n\n \
+	<b>avconv</b>: manipulation sur les vidéos et le son\n \
+	<b>mencoder</b>: manipulation sur les vidéos (sous-titres)\n \
+	<b>sox</b>: conversion de fichiers audio\n \
+	<b>lame</b>: complément de sox\n \
+	<b>imagemagick</b>: manipulation sur les images\n \
+<span color=\"blue\"><b><u>Documents</u></b></span>\n\n \
+	<b>pstotext</b>: conversion PDF vers TXT\n \
+	<b>ghostscript</b>: manipulation sur les PDF\n\n \
+Bien sûr, d'autres petits outils sont utilisés par certains scripts, mais ces derniers devraient déjà être présents dans votre système !" \
+--ok-label="Installer les dépendances" --cancel-label="Quitter le script d'installation" `;
+
+	# Si l'utilisateur refuse, on quitte
+	if [ "$?" == 1 ] ; then exit 
+	else
+	echo `xterm -e gksudo "apt-get install -f -y libav-tools mencoder curl sox libsox-fmt-all lame imagemagick pstotext ghostscript"`
+fi

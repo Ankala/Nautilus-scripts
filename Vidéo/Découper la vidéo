@@ -1,0 +1,150 @@
+#!/bin/bash
+########################################################################
+#Script découpant une vidéo (début et durée)
+#Nom du script: Découper une vidéo 1.1
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de avconv
+#Licence: GPL v3
+#À venir en v1.2: ?
+########################################################################
+version="v1.1"	# Correction de bugs mineurs et ajout d'un sous-menu avancé
+
+	# On s'assure que 'avconv' est bien installé
+	avconv_exists=`which avconv | grep -c "avconv"`
+
+	# On affiche une erreur si 'avconv' n'est pas installé
+	# On tente une installation automatique de 'avconv'
+	if [ $avconv_exists -eq 0 ]; then
+		avconv_error=`zenity --error --title="Erreur - Outil de conversion manquant !" --text="Vous devez installer le paquet avconv afin d'utiliser ce script.\n\nTentative d'installation automatique amorcée."`;
+		install_avconv=`gksudo apt-get install avconv | zenity --progress --pulsate --title "Installation de avconv" --text "Installation en cours..." --auto-close`;
+	fi
+	
+	# On s'assure que l'installation automatique de 'avconv' a réussi
+	avconv_exists2=`which avconv | grep -c "avconv"`
+	
+	# Si ce n'est pas le cas, on affiche une erreur et on quitte
+	if [ $avconv_exists2 -eq 0 ]; then
+		zenity --error --title="Erreur détectée !" --text="ERREUR: La tentative d'installation automatique a échouée. Veuillez installer avconv manuellement, à partir de votre terminal: sudo apt-get install avconv";
+		exit;
+	fi
+
+	# On s'assure qu'un fichier est seléctionné
+	mime=`file -bi "$1"`;
+	correct_video="0";
+
+	# On s'assure que le fichier VIDEO est dans le bon format: ogv, flv, asf, mp4, m4v, avi, 3gp, bik, mov, mpg, dv, mkv, webm, ts, vob
+	## Liste des extensions vidéo
+	if echo "$1" | grep -q '.3gp'|| echo "$1" | grep -q '.3g2'; then
+		echo "File is in .3gp Format"
+		video_type="3gp"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mkv'|| echo "$1" | grep -q '.MKV'; then
+		echo "File is in .mkv Format"
+		video_type="mkv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.vob'|| echo "$1" | grep -q '.VOB'; then
+		echo "File is in .vob Format"
+		video_type="vob"
+		correct_video="1"
+	elif echo "$1" | grep -q '.webm'|| echo "$1" | grep -q '.WEBM'; then
+		echo "File is in .webm Format"
+		video_type="webm"
+		correct_video="1"
+	elif echo "$1" | grep -q '.ts'|| echo "$1" | grep -q '.TS'; then
+		echo "File is in .ts Format"
+		video_type="ts"
+		correct_video="1"
+	elif echo "$1" | grep -q '.ogv'|| echo "$1" | grep -q '.OGV'; then
+		echo "File is in .ogv Format"
+		video_type="ogv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.dv'|| echo "$1" | grep -q '.DV'; then
+		echo "File is in .dv Format"
+		video_type="dv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.flv'|| echo "$1" | grep -q '.FLV'; then
+		echo "File is in .flv Format"
+		video_type="flv"
+		correct_video="1"
+	elif echo "$1" | grep -q '.asf' || echo "$1" | grep -q '.ASF'; then
+		echo "File is in .asf Format"
+		video_type="asf"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mp4'|| echo "$1" | grep -q '.MP4'; then
+		echo "File is in .mp4 Format"
+		video_type="mp4"
+		correct_video="1"
+	elif echo "$1" | grep -q '.m4v'|| echo "$1" | grep -q '.M4V'; then
+		echo "File is in .m4v Format"
+		video_type="m4v"
+		correct_video="1"
+	elif echo "$1" | grep -q '.avi'|| echo "$1" | grep -q '.AVI'; then
+		echo "File is in .avi Format"
+		video_type="avi"
+		correct_video="1"
+	elif echo "$1" | grep -q '.bik'|| echo "$1" | grep -q '.BIK'; then
+		echo "File is in .bik Format"
+		video_type="bik"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mov'|| echo "$1" | grep -q '.MOV'; then
+		echo "File is in .mov Format"
+		video_type="mov"
+		correct_video="1"
+	elif echo "$1" | grep -q '.mpg'|| echo "$1" | grep -q '.MPG'; then
+		echo "File is in .mpg Format"
+		video_type="mpg"
+		correct_video="1"
+	elif [ $1 -eq 0 ]; then
+		zenity --error --title="Erreur" --text="Vous devez sélectionner un fichier vidéo..."
+		exit 1
+	elif [ $correct_video -eq 0 ]; then
+		zenity --error --title="Erreur - Format non supporté -" --text="Sélectionnez un fichier <b>ogv, flv, asf, mp4, m4v, avi, mkv, 3gp, bik, mov, mpg, dv, webm, ts, vob</b> valide."
+		exit 1
+	else
+		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+		exit 1
+	fi
+
+	# Si le format vidéo est correct, afficher les options suivantes
+	if [ $correct_video -eq "1" ]; then
+	do_encode="1";
+
+	# Encoder la vidéo
+	if [[ $do_encode -eq "1" ]]; then
+	# On affiche le menu principal de découpes simples et avancées
+	option=`zenity --list --radiolist --width="520" --height="215" --title="Découper la vidéo $version" --text="Choisir un mode de découpage pour la vidéo <b>$1</b>." --column="Cocher" --column="Mode" --column="Description" \
+	FALSE "Découpage simple" "En minutes uniquement" \
+	TRUE "Découpage avancé" "Choix avancé des découpes" `;
+
+	# Options de découpage
+	# Entrer début de découpe et durée de découpe totale
+	if [ "$option" = "Découpage simple" ]; then
+	debut=`zenity --entry --title="Début de la découpe de la vidéo" --entry-text "1" --text="Entrez la minute correspondant au début de la vidéo découpée.\n\nVidéo à découper: $1\n\nEntrez uniquement une valeur numérique."`
+	duree=`zenity --entry --title="Durée totale de la vidéo découpée" --entry-text "5" --text="Définissez la durée (en minutes) de la vidéo découpée.\n\nVidéo à découper: $1\n\nEntrez uniquement une valeur numérique."`
+
+	# Démarrage de la découpe de la vidéo
+	decoupe=`avconv -ss 00:"$debut":00 -t 00:"$duree":00 -i "$1" -vcodec copy -acodec copy  "découpe-simple_$1" \
+	| zenity --progress --width="500" --pulsate --title "Découpage simple de la vidéo" \
+	--text "Découpage de <b>$1</b> en cours..." --auto-close`;
+	notify-send "Découpage de la vidéo" "La vidéo "$1" a été correctement découpée (début à "$debut" minute(s), durée de "$duree" minute(s)).";
+fi
+	# Entrer début de découpe et durée de découpe avancée
+	if [ "$option" = "Découpage avancé" ]; then
+	debut=`zenity --entry --title="Début de la découpe de la vidéo" --entry-text "00:00:00" --text="Entrez les valeurs correspondant au début de la vidéo découpée.\n\nVidéo à découper: $1\n\nexemple:\n00:00:00 -> démarre la découpe au tout début de la vidéo.\n01:23:50 -> démarre la découpe à 1h 23min et 50s de la vidéo."`
+	duree=`zenity --entry --title="Durée totale de la vidéo découpée" --entry-text "00:00:30" --text="Entrez les valeurs correspondant à la durée totale de la vidéo découpée.\n\nVidéo à découper: $1\n\nexemple:\n00:15:10 -> la vidéo découpée durera 15min et 10s au total."`
+
+	# Démarrage de la découpe de la vidéo
+	decoupe=`avconv -i "$1" -vcodec copy -acodec copy -ss "$debut" -t "$duree" "découpe-avancee_$1" \
+	| zenity --progress --width="500" --pulsate --title "Découpage avancé de la vidéo" \
+	--text "Découpage de <b>$1</b> en cours..." --auto-close`;
+	notify-send "Découpage avancé de la vidéo" "La vidéo "$1" a été correctement découpée (début à "$debut", durée de "$duree")";
+fi
+
+
+fi
+
+
+### FIN DU SCRIPT
+fi
+### FIN DU SCRIPT

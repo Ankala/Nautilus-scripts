@@ -1,0 +1,140 @@
+#!/bin/bash
+########################################################################
+#Script permettant de générer des empreintes MD5, SHA ou CRC
+#Nom du script: Générer l'empreinte du fichier v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1: ?
+########################################################################
+version="v1.0"
+IFS="
+"
+
+	# On vérifie qu'aucun dossier n'a été selectionné
+for File in "$@"
+do
+if [ -d "$File" ]; then
+zenity --error --text="<b>$File</b> est un dossier.
+Impossible de générer une empreinte sur un dossier."
+exit
+fi
+done
+
+	# On doit être sûr qu'un fichier est sélectionné
+	# Détection du fichier 
+	mime=`file -bi "$1"`;
+
+	# Menu principal 
+	genere=`zenity --list --radiolist --width="520" --height="230" --title="Générer une empreinte $version" --text="Choisir un type de génération pour le fichier <i><b>$1</b></i>" --column="Cocher" --column="Mode" --column="Description" \
+	TRUE "Empreinte MD5" "Générer l'empreinte MD5 du fichier" \
+	FALSE "Empreinte CRC" "Générer l'empreinte CRC du fichier" \
+	FALSE "Empreinte SHA1" "Générer l'empreinte SHA1 du fichier" \
+	FALSE "Empreinte SHA256" "Générer l'empreinte SHA256 du fichier" `;
+
+	# Sous-menu md5
+	if [ "$genere" = "Empreinte MD5" ]; then
+	# Entrer le nom du md5
+	CheckName=`zenity --entry --title="Générer le MD5" --entry-text "$1.md5" --text="Vous pouvez modifier le nom du fichier MD5"`
+	if [ "$?" == 1 ] ; then exit ; fi
+	#Génération de l'empreinte md5
+(md5sum "$@" > "$CheckName") 2>&1 | zenity --progress --title "Création du md5" --text "Génération de <b>$CheckName</b> en cours" --pulsate --auto-close
+md5Hash=`md5sum "$1"`;
+md5sansnom="${md5Hash%%  $FilePath$1}"
+zenity --question --title "Génération de l'empreinte MD5" --text="<u>Fichier source:</u> \n\n<b>$1</b> \n\n<u>Empreinte MD5:</u> \n\n<b>$md5sansnom</b> \n\nVoulez-vous crypter cette empreinte ?";
+
+	# Cryptage de l'empreinte MD5
+	if [ "$?" == 0 ] ; then 
+	gpg -c $CheckName.gpg
+	if [[ $ext != "gpg" ]]
+then
+	dirname=`dirname $CheckName`
+	basename=`basename $CheckName`
+	cd $dirname
+	(gpg -cq --force-mdc -o $CheckName.gpg --yes $CheckName)
+fi
+notify-send "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
+fi
+################################### Cryptage terminé
+fi
+
+	# Sous-menu crc
+	if [ "$genere" = "Empreinte CRC" ]; then
+	# Entrer le nom du crc
+	CheckName=`zenity --entry --title="Générer le CRC" --entry-text "$1.crc" --text="Vous pouvez modifier le nom du fichier CRC"`
+	if [ "$?" == 1 ] ; then exit ; fi
+	# Génération de l'empreinte crc
+(cksum "$@" > "$CheckName") 2>&1 | zenity --progress --title "Création du crc" --text "Génération de <b>$CheckName</b> en cours" --pulsate --auto-close
+crcHash=`cksum "$1"`;
+crcsansnom="${crcHash%%  $FilePath$1}"
+zenity --question --title "Génération de l'empreinte CRC de $1" --text="<u>Fichier source:</u> \n\n<b>$1</b> \n\n<u>Empreinte CRC:</u> \n\n<b>$crcsansnom</b> \n\nVoulez-vous crypter cette empreinte ?";
+
+	# Cryptage de l'empreinte CRC
+	if [ "$?" == 0 ] ; then 
+	gpg -c $CheckName.gpg
+	if [[ $ext != "gpg" ]]
+then
+	dirname=`dirname $CheckName`
+	basename=`basename $CheckName`
+	cd $dirname
+	(gpg -cq --force-mdc -o $CheckName.gpg --yes $CheckName)
+fi
+notify-send "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
+fi
+########### Cryptage terminé
+fi
+
+	# Sous-menu sha1
+	if [ "$genere" = "Empreinte SHA1" ]; then
+	# Entrer le nom du sha1
+	CheckName=`zenity --entry --title="Générer le SHA1" --entry-text "$1.sha1" --text="Vous pouvez modifier le nom du fichier SHA1"`
+	if [ "$?" == 1 ] ; then exit ; fi
+	#Génération de l'empreinte sha1
+(sha1sum "$@" > "$CheckName") 2>&1 | zenity --progress --title "Création du sha1" --text "Génération de <b>$CheckName</b> en cours" --pulsate --auto-close
+sha1Hash=`sha1sum "$1"`;
+sha1sansnom="${sha1Hash%%  $FilePath$1}"
+zenity --question --title "Génération de l'empreinte SHA1 de $1" --text="<u>Fichier source:</u> \n\n<b>$1</b> \n\n<u>Empreinte SHA1:</u> \n\n<b>$sha1sansnom</b> \n\nVoulez-vous crypter cette empreinte ?";
+
+	# Cryptage de l'empreinte SHA1
+	if [ "$?" == 0 ] ; then 
+	gpg -c $CheckName.gpg
+	if [[ $ext != "gpg" ]]
+then
+	dirname=`dirname $CheckName`
+	basename=`basename $CheckName`
+	cd $dirname
+	(gpg -cq --force-mdc -o $CheckName.gpg --yes $CheckName)
+fi
+notify-send "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
+fi
+################################### Cryptage terminé
+fi
+
+	# Sous-menu sha256
+	if [ "$genere" = "Empreinte SHA256" ]; then
+	# Entrer le nom du sha256
+	CheckName=`zenity --entry --title="Générer le SHA256" --entry-text "$1.sha256" --text="Vous pouvez modifier le nom du fichier SHA256"`
+	if [ "$?" == 1 ] ; then exit ; fi
+	# Génération de l'empreinte sha256
+(sha256sum "$@" > "$CheckName") 2>&1 | zenity --progress --title "Création du sha256" --text "Génération de <b>$CheckName</b> en cours" --pulsate --auto-close
+sha256Hash=`sha256sum "$1"`;
+sha256sansnom="${sha256Hash%%  $FilePath$1}"
+zenity --question --title "Génération de l'empreinte SHA256 de $1" --text="<u>Fichier source:</u> \n\n<b>$1</b> \n\n<u>Empreinte SHA256:</u> \n\n<b>$sha256sansnom</b> \n\nVoulez-vous crypter cette empreinte ?";
+
+	# Cryptage de l'empreinte SHA1
+	if [ "$?" == 0 ] ; then 
+	gpg -c $CheckName.gpg
+	if [[ $ext != "gpg" ]]
+then
+	dirname=`dirname $CheckName`
+	basename=`basename $CheckName`
+	cd $dirname
+	(gpg -cq --force-mdc -o $CheckName.gpg --yes $CheckName)
+fi
+notify-send "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
+fi
+################################### Cryptage terminé
+fi
+### Fin
+fi
+### Fin

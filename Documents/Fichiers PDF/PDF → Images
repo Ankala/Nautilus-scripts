@@ -1,0 +1,63 @@
+#!/bin/bash
+########################################################################
+#Script permettant de convertir un fichier PDF en plusieurs images
+#Nom du script: PDF vers Images v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1: ?
+########################################################################
+version="v1.0"
+IFS="
+"
+
+# On vérifie qu'aucun dossier n'a été selectionné
+for File in "$@"
+do
+if [ -d "$File" ]; then
+zenity --error --text="<b>$File</b> est un dossier.
+Impossible de convertir un dossier en images."
+exit
+fi
+done
+
+### On doit être sûr qu'un fichier est sélectionné
+	# Détection du fichier 
+	mime=`file -bi "$1"`;
+	correct_format="0";
+	
+	# On s'assure que le fichier est dans le bon format: pdf
+	if echo "$1" | grep -q '.pdf'|| echo "$1" | grep -q '.PDF'; then
+		echo "File is in .pdf Format"
+		format_type="pdf"
+		correct_format="1"
+	elif [ $1 -eq 0 ]; then
+		zenity --error --title="Erreur" --text="Vous devez sélectionner un fichier pdf..."
+		exit 1
+	elif [ $correct_format -eq 0 ]; then
+		zenity --error --title="Erreur - Format non supporté -" --text="Sélectionnez un fichier au format <b>pdf</b> valide."
+		exit 1
+	else
+		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+		exit 1
+	fi
+
+	# Si le fichier est un PDF, on permet la conversion
+	if [ $correct_format -eq "1" ]; then
+
+	# On informe l'utilisateur de la suite des opérations
+			zenity --question --title="Conversion du PDF en Images $version" --text="Le fichier PDF <b>$1</b> va être converti en plusieurs images au format <b>PNG</b>. \n\nVoulez-vous procéder à cette conversion ?"
+	
+	# Si l'utilisateur accepte, on commence la conversion
+	if [ "$?" == 0 ] ; then 
+	conversion=`convert "$1" "${1%.*}".png \
+	| zenity --progress --title "Conversion en cours..." --text "Le fichier PDF <b>$1</b> est en cours de conversion en images <b>PNG</b>." --pulsate --auto-close \
+	| notify-send "PDF vers Images PNG" "Le fichier PDF $1 a été converti en une série d'images au format PNG avec succès !"`;
+	
+	# Si non, on quitte le script
+	else
+	exit 1
+fi
+################################### Opération de conversion terminée
+fi
+

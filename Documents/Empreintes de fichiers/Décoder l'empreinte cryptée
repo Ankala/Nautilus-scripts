@@ -1,0 +1,51 @@
+#!/bin/bash
+########################################################################
+#Script permettant de décoder des fichiers MD5, SHA ou CRC cryptés en gpg
+#Nom du script: Décoder l'empreinte cryptée v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1: ?
+########################################################################
+version="v1.0"
+IFS="
+"
+
+	# On vérifie qu'aucun dossier n'a été selectionné
+for File in "$@"
+do
+if [ -d "$File" ]; then
+zenity --error --text="<b>$File</b> est un dossier.
+Impossible de générer une empreinte sur un dossier."
+exit
+fi
+done
+
+	# On doit être sûr qu'un fichier est sélectionné
+	# Détection du fichier 
+	mime=`file -bi "$1"`;
+	
+	# Selection du fichier gpg crypté 
+	SelectedFile=`zenity --file-selection --title "Veuillez choisir le FICHIER CRYPTÉ" --file-filter="Fichiers cryptés | *.gpg"`
+
+	# Erreur si le fichier est vide ou inexistant
+	if [ "$SelectedFile" = "" ]; then
+	if [ $# != 1 ]; then
+	zenity --error --text="Vous devez choisir un fichier à décrypter !"
+exit 0
+fi
+fi
+	# Erreur si le fichier est vide ou inexistant
+	if [ `stat --printf="%s" "$SelectedFile"` = "0" ]; then
+ zenity --warning --text="Le fichier <b>$SelectedFile</b> est vide !
+Il est inutile de décrypter un fichier vide !"
+exit 0
+fi
+
+	# Si le fichier est valide, on procède au décodage
+	zenity --question --title="Décoder une empreinte cryptée" --text="Voulez-vous décrypter ce fichier ? \n\n<b>$SelectedFile</b>" && (gpg $SelectedFile)
+	notify-send "Décodage de l'empreinte cryptée" "L'empreinte $SelectedFile a été décodée avec succès !"
+fi
+### Fin
+fi
+### Fin

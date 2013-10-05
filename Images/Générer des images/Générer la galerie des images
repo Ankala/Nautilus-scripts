@@ -1,0 +1,82 @@
+#!/bin/bash
+########################################################################
+#Script générant une galerie simple ou personalisée des images
+#Nom du script: Galerie d'images v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de ImageMagick
+#Licence: GPL v3
+########################################################################
+version="v1.0"
+IFS="
+"
+	# On s'assure qu'au moins un fichier est sélectionné
+	mime=`file -bi "$1"`;
+	correct_format="0";
+	# On s'assure que ce fichier est dans le bon format
+	if echo "$1" | grep -q '.jpg'|| echo "$1" | grep -q '.JPG'; then
+		audio_type="jpg"
+		correct_format="1"
+	elif echo "$1" | grep -q '.jpeg'|| echo "$1" | grep -q '.JPEG'; then
+		audio_type="jpeg"
+		correct_format="1"
+	elif echo "$1" | grep -q '.png'|| echo "$1" | grep -q '.PNG'; then
+		audio_type="png"
+		correct_format="1"
+	elif echo "$1" | grep -q '.gif'|| echo "$1" | grep -q '.GIF'; then
+		audio_type="gif"
+		correct_format="1"
+
+	# On affiche une erreur si aucun fichier n'est seléctionné
+	elif [ $1 -eq 0 ]; then
+		zenity --error --title="Erreur" --text="Vous devez sélectionner au moins une image..."
+		exit 1
+	
+	# On affiche une erreur si ce fichier est dans un format non-supporté
+	elif [ $correct_video -eq 0 ]; then
+		zenity --error --title="Erreur - Format non supporté -" --text="Sélectionnez une ou plusieurs image au format <b>png, gif ou jpg</b> valide."
+		exit 1
+	
+	# On affiche une erreur si le script ne reconnait pas le fichier
+	else
+		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+		exit 1
+	fi
+
+	# Si le format du fichier est correct, on démarre l'opération
+	if [ $correct_format -eq "1" ]; then
+
+	# Menu principal
+	option=`zenity --list --radiolist --width="550" --height="200" --title="Générer la galerie des images $version" --column="Cocher" --column="Option" --column="Description" \
+	FALSE "Galerie légère" "Galerie de miniatures légère" \
+	TRUE "Galerie simple" "Galerie sobre et sans effets" \
+	FALSE "Galerie polaroide" "Galerie personnalisée avec effet polaroide" `;
+	
+	if [ "$option" = "Galerie légère" ]; then
+	# On crée le répertoire 'galerie'
+	mkdir galerie_mini
+		# On démarre l'opération Galerie
+	convert_galeriemini=`montage -label \"%f\" $@ -frame 5 -geometry 100x100 galerie_mini/galerie.png \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Galerie de photos en cours..." \
+	--text "Application de l'effet <b>Galerie de photos</b> sur les images sélectionnées" --auto-close`;
+	fi
+	
+	if [ "$option" = "Galerie simple" ]; then
+	# On crée le répertoire 'galerie'
+	mkdir galerie_simple
+		# On démarre l'opération Galerie
+	convert_galeriesimple=`montage $@ galerie_simple/galerie.png \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Galerie de photos en cours..." \
+	--text "Application de l'effet <b>Galerie de photos</b> sur les images sélectionnées" --auto-close`;
+	fi	
+	
+	if [ "$option" = "Galerie polaroide" ]; then
+	# On crée le répertoire 'galerie'
+	mkdir galerie_polaroide
+		# On démarre l'opération Galerie
+	caption=`zenity --entry --title="Titre de la galerie polaroide" --text="Veuillez entrer le titre de la galerie polaroide"`
+	convert_montage=`montage $@ -thumbnail 300x300 -set caption %t -bordercolor "#E6E6FA" -background grey40 -pointsize 9 -density 144x144 +polaroid -resize 50%  -background white -geometry +1+1 -title "$caption" galerie_polaroide/galerie.png \
+	| zenity --progress --width="500" --pulsate --title "Ajout de l'effet Galerie de photos en cours..." \
+	--text "Application de l'effet <b>Galerie de photos</b> sur les images sélectionnées" --auto-close`;
+	fi
+fi

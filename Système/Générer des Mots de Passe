@@ -1,0 +1,31 @@
+#!/bin/bash
+########################################################################
+#Script permettant de générer plusieurs mots de passe aléatoires
+#Nom du script: Générer Mot de Passe v1.1
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.2: - Donner le choix dans le nombre de mots de passe à générer
+########################################################################
+version="v1.1"
+
+	# On affiche la fenêtre principale, avec entrée du nombre de caractères
+	nombre=`zenity --entry --title="Générer un mot de passe $version" --text="Entrez le nombre de caractères des mots de passe à générer. \n\nexemple: 8" --entry-text="20"`
+	
+	# Si l'utilisateur valide, on affiche les 4 mots de passe générés
+	if [ "$?" == 0 ] ; then 
+a=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n "$nombre" | tr -d '\n')
+b=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n "$nombre" | tr -d '\n')
+c=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n "$nombre" | tr -d '\n')
+d=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n "$nombre" | tr -d '\n')
+
+pass=`zenity --width="265" --height="130" --info --title="Générer un mot de passe $version" --text="<u>Mot de Passe 1:</u> \n<b>$a</b> \
+\n\n<u>Mot de Passe 2:</u> \n<b>$b</b> \
+\n\n<u>Mot de Passe 3:</u> \n<b>$c</b> \
+\n\n<u>Mot de Passe 4:</u> \n<b>$d</b>"`
+
+	# S'il annule, on quitte le script
+	else
+	exit 1
+fi
+

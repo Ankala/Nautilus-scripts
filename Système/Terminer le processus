@@ -1,0 +1,32 @@
+#!/bin/bash
+########################################################################
+#Script permettant de tuer un processus bloqué/récalcitrant
+#Nom du script: Terminer le processus v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1:
+########################################################################
+version="v1.0"
+
+IFS=$'\n'
+
+array=( $( xprop | grep -e 'WM_CLASS' -e 'PID' ) )
+
+array[0]=${array[0]//[^[:digit:]]}
+array[1]=${array[1]%\"}
+array[1]=${array[1]##*\"}
+
+zenity --question --text "Êtes-vous sûr de vouloir <b>terminer</b> l'application <b>${array[1],,}</b>?"
+
+case $? in
+
+     0) kill ${array[0]}
+        exit $?
+     ;;
+
+     *) echo "Opération annulée"
+        exit 3
+     ;;
+
+esac

@@ -1,0 +1,25 @@
+#!/bin/bash
+########################################################################
+#Script permettant de connaitre les dimensions d'une fenêtre
+#Nom du script: Dimensions de la fenêtre v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Source:Documentation de Xrandr
+#Licence: GPL v3
+#À venir en v1.1: Regrouper les 3 commandes en une seule ?
+########################################################################
+version="v1.0"
+
+	# On affiche une notification informant de la marche à suivre
+	notify-send "Dimensions de la fenêtre" "Veuillez cliquer à 3 reprises successives sur la même fenêtre, afin de récupérer sa Largeur, sa Hauteur et son ID !"
+
+width=`xwininfo | grep Width | awk '{ print $2} '`
+height=`xwininfo | grep Height | awk '{ print $2 }'`
+array=`xwininfo | grep "Window id:" | awk '{print $4}'`
+
+	# On affiche les résolutions disponibles par le moniteur
+zenity --width="265" --height="150" --info --title="Dimensions de la fenêtre $version" \
+--text="<u>Fenêtre:</u> <b>$array</b>\n\n<u>Largeur:</u> <b>$width pixels</b> \
+\n\n<u>Hauteur:</u> <b>$height pixels</b>"
+
+

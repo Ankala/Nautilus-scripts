@@ -1,0 +1,15 @@
+#!/bin/bash
+########################################################################
+#Script permettant de supprimer tous les dossiers vides du dossier courant
+#Nom du script: Supprimer les dossiers vides v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1: ?
+########################################################################
+version="v1.0"
+IFS="
+"
+	# On supprime tous les dossiers vides du répertoire courant
+find . -empty -type d -exec rmdir {} +
+notify-send "Suppression des dossiers vides" "Tous les dossiers vides du répertoire courant ont été supprimés avec succès !"

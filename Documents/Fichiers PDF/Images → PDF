@@ -1,0 +1,57 @@
+#!/bin/bash
+########################################################################
+#Script permettant de convertir plusieurs images en un fichier PDF
+#Nom du script: Images vers PDF v1.1
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.2: ?
+########################################################################
+version="v1.1"	# Corrections de bugs mineurs & polissage
+IFS="
+"
+
+	# On s'assure qu'au moins une de ces images est seléctionnée
+	for image in "$@"
+do
+
+	# On informe l'utilisateur de la suite des opérations
+	zenity --question --title="Images vers PDF $version" --text="Le script va convertir <b>toutes</b> les images d'un même format (<b>PNG</b> ou <b>JPG</b>) en un fichier PDF.\n\nPar exemple, si vous aviez sélectionné une image au format <b>PNG</b>, toutes les autres images de ce format seront converties.\n\nVoulez-vous procéder à cette conversion ?"
+	
+	# S'il accepte, on permet la conversion
+	if [ "$?" == 0 ] ; then 
+	
+	# Conversion de PNG en PDF
+	if echo "$image" | grep -q '.png$'; then
+	conversion=`convert *.png "${1%.*}".pdf \
+	| zenity --progress --title "Conversion en cours..." --text "Les images <b>PNG</b> du dossier courant sont en cours de conversion." --pulsate --auto-close \
+	| notify-send "Images PNG vers fichier PDF" "La conversion des images en fichier PDF est terminée !"`;
+fi
+
+	# Conversion de JPG en PDF
+	if echo "$image" | grep -q '.jpg$'; then
+	conversion=`convert *.jpg "${1%.*}".pdf \
+	| zenity --progress --title "Conversion en cours..." --text "Les images <b>JPG</b> du dossier courant sont en cours de conversion." --pulsate --auto-close \
+	| notify-send "Images JPG vers fichier PDF" "La conversion des images en fichier PDF est terminée !"`;
+fi
+
+################################### Opération de conversion terminée
+	
+	# Une fois la conversion terminée, on demande la compression ou non
+	if [ "$?" == 0 ] ; then 
+	zenity --question --title="Compression du PDF" --text="Si vous venez d'assembler un nombre important d'Images en un fichier PDF, il se peut que la taille de ce fichier soit conséquente. \n\nVoulez-vous procéder à une compression du fichier PDF ainsi obtenu ?"
+	
+	# Si l'utilisateur l'accepte, on compresse le PDF
+	if [ "$?" == 0 ] ; then 
+	compression=`gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile="$1_compressé".pdf "${1%.*}".pdf \
+	| zenity --progress --title "Compression en cours..." --text "Le fichier PDF <b>"${1%.*}".pdf</b> est en cours de compression." --pulsate --auto-close \
+	| notify-send "Compression du PDF" "La compression du fichier "${1%.*}".pdf est terminée !"`;
+	
+	# Si non, on quitte le script
+	else
+	exit 1
+	fi
+	fi
+	fi
+done
+

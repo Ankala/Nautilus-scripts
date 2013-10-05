@@ -1,0 +1,19 @@
+#!/bin/bash
+########################################################################
+#Script permettant de supprimer tous les fichiers vides du dossier courant
+#Nom du script: Supprimer fichiers vides v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.co.cc
+#Licence: GPL v3
+#À venir en v1.1: ?
+########################################################################
+version="v1.0"
+IFS="
+"
+	# On cherche tous les fichiers présents dans le dossier courant
+for file in *;
+  do
+	# On supprime tous les fichiers vides
+        find . -empty -exec rm -f {} \;
+  done
+notify-send "Suppression des fichiers vides" "Tous les fichiers vides du répertoire courant ont été supprimés avec succès !"
