@@ -3,7 +3,7 @@
 #Script modifiant les permissions (exécution) d'un fichier/dossier
 #Nom du script: Rendre exécutable v1.1
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
+#Site Web: http://ankala.fr
 #Licence: GPL v3
 #Version 1.1: 
 ########################################################################
@@ -16,7 +16,7 @@ IFS="
 	mime=`file -bi "$1"`;
 
 	# On affiche le menu principal sous forme de liste-radio
-	option=`zenity --list --radiolist --width="560" --height="210" --title="Rendre exécutable $version" --text="Choisir une action à effectuer" --column="Cocher" --column="Action" --column="Description" \
+	option=`zenity --list --radiolist --width="560" --height="210" --title="Rendre exécutable $version" --text="Choisir une action pour <i><b>$1</b></i>" --column="Cocher" --column="Action" --column="Description" \
 	TRUE "Fichier/Dossier" "Rendre le fichier sélectionné exécutable" \
 	FALSE "Récursif" "Rendre un dossier et son contenu exécutables" `;
 
@@ -25,7 +25,7 @@ IFS="
 		chmod ugo+x $1
 	
 	# On affiche une notification de réussite
-	notify-send "Modification des permissions (exécution)" "Vous pouvez dorénavant lancer le fichier $1 simplement par double-clic !"
+	notify-send -i /usr/share/icons/Humanity/actions/48/system-run.svg "Rendre exécutable" "Vous pouvez dorénavant lancer le fichier $1 simplement par double-clic !"
 fi
 
 	# Opération sur un dossier distant et tout son contenu
@@ -33,6 +33,6 @@ fi
 		chmod +x -R $1
 	
 	# On affiche une notification de réussite
-	notify-send "Modification des permissions (exécution)" "Vous pouvez dorénavant lancer le fichier $1 aet l'ensemble de son contenu simplement par double-clic !"
+	notify-send -i /usr/share/icons/Humanity/actions/48/system-run.svg "Rendre exécutable" "Vous pouvez dorénavant lancer le fichier $1 et l'ensemble de son contenu simplement par double-clic !"
 fi
 clean_temp

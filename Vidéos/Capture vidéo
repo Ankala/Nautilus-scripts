@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
-#Script capturant la vidéo (screencast)
+#Script capturant l'écran (screencast)
 #Nom du script: Capture vidéo v1.2
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
-#Source:Documentation de FFMPEG/AVCONV
+#Site Web: http://ankala.fr
+#Source: Documentation de FFMPEG/AVCONV
 #Licence: GPL v3
 #À venir en v1.3: ?
 ########################################################################
@@ -33,12 +33,15 @@ avconv -f x11grab \
   -acodec libmp3lame \
   -t $duree -y $nom.avi
 fi
-	notify-send -i /usr/share/icons/Humanity/apps/48/gnome-sound-recorder.svg "Capture vidéo" "La capture vidéo a été correctement enregistrée sous le nom $nom.avi !"
+	notify-send -i /usr/share/icons/Humanity/apps/48/checkbox.svg "Capture vidéo" "La capture vidéo a été correctement enregistrée sous le nom $nom.avi !"
 
 	# On demande à ouvrir l'image générée dans 'Totem'
-	question=$(zenity --question --title="Lecture de la capture vidéo" --text "Voulez-vous ouvrir l'enregistrement vidéo <b>$nom.avi</b> avec le lecteur <b>Totem</b> ?" --ok-label="Ouvrir avec Totem" \ --cancel-label="Ne pas ouvrir")
+	question=$(zenity --question --title="Compression de la capture vidéo" --text "Voulez-vous ouvrir réduire le poids de la capture vidéo <b>$nom.avi</b> en la convertissant au format <b>MP4</b> ?" --ok-label="Compresser la vidéo" \ --cancel-label="Ne pas compresser")
 	if [ "$?" == 1 ] ; then exit 1
 	else
 	# Sinon, on ouvre l'image dans Totem
-	totem $nom.avi
+	encode_video=`avconv -i "$nom".avi -vcodec libx264 -pre:v main -g 30 "$nom".mp4 \
+	| zenity --progress --width="500" --pulsate --auto-close --title "Conversion en cours..." \
+	--text "Conversion de <b>"$nom"</b> vers le format <b>MP4</b>."`;
+	notify-send -i /usr/share/icons/Humanity/apps/48/totem.svg "Compression de la capture vidéo - MP4" "La capture vidéo $nom.avi a été compressée en $nom.mp4 !";
 fi

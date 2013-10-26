@@ -3,8 +3,8 @@
 #Script permettant de répéter plusieurs fois l'image selon une résolution prédeterminée
 #Nom du script: Créer une planche à partir d'images v1.0
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
-#Source:Documentation de ImageMagick
+#Site Web: http://ankala.fr
+#Source: Documentation de ImageMagick
 #Licence: GPL v3
 #À venir en v1.1: Plus d'options ?
 ########################################################################
@@ -16,9 +16,9 @@ IFS="
 	menu=`zenity --info --width="220" --height="155" --title="Créer une planche à partir d'images $version" --text="Ce script permet au choix de créer une nouvelle image, avec résolution prédéfinie, qui contiendra plusieurs fois l'image sélectionnée (planche personnalisée).\n\nOu bien d'assembler les images sélectionnées dans une planche du style des bandes dessinées verticales (une seule colonne)."`;
 
 	# Menu principal
-	option=`zenity --list --radiolist --width="570" --height="200" --title="Créer une planche à partir d'images $version" --column="Cocher" --column="Option" --column="Description" \
-	FALSE "Planche verticale" "Planche à 1 colonne (bande dessinée verticale)" \
-	TRUE "Planche personnalisée" "Planche aux dimensions modifiables" `;
+	option=`zenity --list --width="570" --height="200" --title="Créer une planche à partir d'images $version" --column="Option" --column="Description" \
+	"Planche verticale" "Planche à 1 colonne (bande dessinée verticale)" \
+	"Planche personnalisée" "Planche aux dimensions modifiables" `;
 	
 	if [ "$option" = "Planche personnalisée" ]; then
 	# Ouvrir l'image source

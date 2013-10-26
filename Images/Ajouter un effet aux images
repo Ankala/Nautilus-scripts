@@ -3,43 +3,20 @@
 #Script ajoutant un effet aux images sélectionnées
 #Nom du script: Ajouter un Effet v1.3
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
-#Source:Documentation de ImageMagick
+#Site Web: http://ankala.fr
+#Source: Documentation de ImageMagick
 #Licence: GPL v3
 ########################################################################
 version="v1.3"
 IFS="
 "
-	# On s'assure qu'au moins un fichier est sélectionné
+	# On s'assure qu'un fichier est sélectionné et du MIME "image"
 	mime=`file -bi "$1"`;
-	correct_format="0";
-	# On s'assure que ce fichier est dans le bon format
-	if echo "$1" | grep -q '.jpg'|| echo "$1" | grep -q '.JPG'; then
-		audio_type="jpg"
-		correct_format="1"
-	elif echo "$1" | grep -q '.jpeg'|| echo "$1" | grep -q '.JPEG'; then
-		audio_type="jpeg"
-		correct_format="1"
-	elif echo "$1" | grep -q '.png'|| echo "$1" | grep -q '.PNG'; then
-		audio_type="png"
-		correct_format="1"
-	elif echo "$1" | grep -q '.gif'|| echo "$1" | grep -q '.GIF'; then
-		audio_type="gif"
-		correct_format="1"
+	correct_format=`echo "$mime" | grep image | wc -l`;
 
-	# On affiche une erreur si aucun fichier n'est seléctionné
-	elif [ $1 -eq 0 ]; then
-		zenity --error --title="Erreur" --text="Vous devez sélectionner au moins une image..."
-		exit 1
-	
-	# On affiche une erreur si ce fichier est dans un format non-supporté
-	elif [ $correct_video -eq 0 ]; then
-		zenity --error --title="Erreur - Format non supporté -" --text="Sélectionnez une ou plusieurs images au format <b>png, gif ou jpg</b> valide."
-		exit 1
-	
-	# On affiche une erreur si le script ne reconnait pas le fichier
-	else
-		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+	# Si le fichier n'est pas de MIME "image"...
+	if [ ! $correct_format -eq 1 ]; then
+		zenity --error --title="Ajouter un Effet $version" --text="Veuillez sélectionner un fichier image valide."
 		exit 1
 	fi
 
@@ -47,23 +24,23 @@ IFS="
 	if [ $correct_format -eq "1" ]; then
 
 	# Menu Principal
-	option=`zenity --list --radiolist --width="535" --height="510" --title="Ajouter un effet aux images $version" --text="L'effet choisi sera appliqué à toutes les images sélectionnées." --column="Cocher" --column="Effet" --column="Description" \
-	TRUE "Contraster" "Accroit/Diminue le contraste" \
-	FALSE "Eclairer" "Augmente la luminosité" \
-	FALSE "Lueur douce" "Ajoute une lueur légère" \
-	FALSE "Crayon" "Effet de contours dessinés" \
-	FALSE "Sketch" "Dessin en pointillés et en couleurs" \
-	FALSE "Accentuer" "Accroit les contours" \
-	FALSE "Flouter" "Effet de flou sur toute l'image" \
-	FALSE "Pixéliser" "Effet de pixelisation" \
-	FALSE "Watermark" "Ajoute un texte/image personnelle" \
-	FALSE "Vignette" "Effet de halo centré" \
-	FALSE "Cadre transparent" "Bordure transparente et floue" \
-	FALSE "Polaroide" "Effet de photo en polaroide" \
-	FALSE "Négatif" "Inverse les couleurs" \
-	FALSE "Sépia" "Jaunit l'image" \
-	FALSE "Niveau de gris" "Grise l'image" \
-	FALSE "Monochrome" "Effet de pointillés noirs et blancs" `;\
+	option=`zenity --list  --height="500" --title="Ajouter un effet aux images $version" --text="L'effet choisi sera appliqué à toutes les images sélectionnées." --column="Effet" --column="Description" \
+	"Contraster" "Accroit/Diminue le contraste" \
+	"Eclairer" "Augmente la luminosité" \
+	"Lueur douce" "Ajoute une lueur légère" \
+	"Crayon" "Effet de contours dessinés" \
+	"Sketch" "Dessin en pointillés et en couleurs" \
+	"Accentuer" "Accroit les contours" \
+	"Flouter" "Effet de flou sur toute l'image" \
+	"Pixéliser" "Effet de pixelisation" \
+	"Watermark" "Ajoute un texte/image personnelle" \
+	"Vignette" "Effet de halo centré" \
+	"Cadre transparent" "Bordure transparente et floue" \
+	"Polaroide" "Effet de photo en polaroide" \
+	"Négatif" "Inverse les couleurs" \
+	"Sépia" "Jaunit l'image" \
+	"Niveau de gris" "Grise l'image" \
+	"Monochrome" "Effet de pointillés noirs et blancs" `;
 
 
 	# Option Accentuer selectionnée
@@ -125,10 +102,10 @@ fi
 	# On crée le répertoire 'Watermark'
 	mkdir watermark
 	# Menu principal 
-	choix=`zenity --list --radiolist --width="560" --height="220" --title="Effet Watermark" --text="Choisir le type d'effet Watermark à ajouter à votre image." --column="Cocher" --column="Type" --column="Description" \
-	TRUE "Texte simple" "Affiche un texte personnalisé en bas de l'image" \
-	FALSE "Texte multiple" "Affiche le même texte plusieurs fois sur l'image" \
-	FALSE "Image externe" "Affiche une image personnelle en tant que Watermark" `;
+	choix=`zenity --list --width="560" --height="220" --title="Effet Watermark" --text="Choisir le type d'effet Watermark à ajouter à votre image." --column="Type" --column="Description" \
+	"Texte simple" "Affiche un texte personnalisé en bas de l'image" \
+	"Texte multiple" "Affiche le même texte plusieurs fois sur l'image" \
+	"Image externe" "Affiche une image personnelle en tant que Watermark" `;
 		
 	# Option Texte simple choisie
 	if [ "$choix" = "Texte simple" ]; then

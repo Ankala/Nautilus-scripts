@@ -1,0 +1,64 @@
+#!/bin/bash
+########################################################################
+#Script incrustant des sous-titres (srt) directement dans une vidéo
+#Nom du script: Incruster des Sous-Titres v1.2
+#Auteur: Astohan
+#Site Web: http://ankala.fr
+#Source: Documentation de Mencoder
+#Licence: GPL v3
+#À venir en v1.3: ?
+########################################################################
+version="v1.2"	# Polissage du code (mimetype detection)
+IFS="
+"
+
+	# On s'assure que 'mencoder' est bien installé
+	mencoder_exists=`which mencoder | grep -c "mencoder"`
+
+	# On affiche une erreur si 'mencoder' n'est pas installé
+	# On tente une installation automatique de 'mencoder'
+	if [ $mencoder_exists -eq 0 ]; then
+	mencoder_error=`zenity --error --title="Erreur - Outil de conversion manquant !" --text="Vous devez installer le paquet mencoder afin d'utiliser ce script.\n\nTentative d'installation automatique amorcée."`;
+	install_mencoder=`gksudo apt-get install mencoder | zenity --progress --pulsate --title "Installation de mencoder" --text "Installation en cours..." --auto-close`;
+	fi
+
+	# On s'assure que l'installation automatique de 'mencoder' a réussi
+	mencoder_exists2=`which mencoder | grep -c "mencoder"`
+	
+	# Si ce n'est pas le cas, on affiche une erreur et on quitte
+	if [ $mencoder_exists2 -eq 0 ]; then
+		zenity --error --title="Erreur détectée !" --text="ERREUR: La tentative d'installation automatique a échouée. Veuillez installer mencoder manuellement, à partir de votre terminal: sudo apt-get install mencoder";
+		exit;
+	fi
+
+	# On s'assure qu'un fichier est sélectionné et du MIME "video"
+	mime=`file -bi "$1"`;
+	correct_video=`echo "$mime" | grep video | wc -l`;
+
+	# Si le fichier n'est pas de MIME "video"...
+	if [ ! $correct_video -eq 1 ]; then
+		zenity --error --title="Incruster des Sous-Titres $version" --text="Veuillez sélectionner un fichier vidéo valide."
+		exit 1
+	fi
+
+	# Si le format vidéo est correct, afficher les options suivantes
+	if [ $correct_video -eq 1 ]; then
+
+	# On demande à l'utilisateur le fichier des sous-titres
+	subtitle=`zenity --file-selection --title "Veuillez choisir le fichier de sous-titres pour $1" --file-filter="Sous-titres | *.srt *.txt *.sub *.ass *.aqt *.dks *.lrc *.vkt *.scr *.pan *.mpl *.pjs *.psb *.ssa *.vsf *.idx"`;
+	if [ "$?" == 1 ] ; then exit 1
+	else
+	# On encode la vidéo en y ajoutant les sous-titres
+fbname=`basename "$subtitle"`
+
+	encode_video=`mencoder "$1" -sub "$subtitle" -utf8 -fontconfig -font Ubuntu \
+	-subfont-text-scale 3  -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1000 -o "titrée_$1" \
+	| zenity --progress --width="500" --pulsate --title "Ajout de sous-titres en cours..." \
+	--text "Le fichier de sous-titres <b>$fbname</b> est incrusté dans la vidéo <b>$1</b>" --auto-close`;
+	# On affiche une notification
+	notify-send -i /usr/share/icons/Humanity/apps/48/accessories-text-editor.svg "Ajout de sous-titres" "Les sous-titres ont été incrustés dans $1 avec succès !";
+
+fi
+
+### FIN DU SCRIPT
+fi

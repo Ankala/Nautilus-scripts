@@ -1,0 +1,88 @@
+#!/bin/bash
+########################################################################
+#Script convertissant les vidéos et musiques d'un format vers un autre
+#Nom du script: Convertir la vidéo v1.3
+#Auteur: Astohan
+#Site Web: http://ankala.fr
+#Source:Documentation de avconv
+#Licence: GPL v3
+#À venir en v1.4: ?
+########################################################################
+version="v1.3" 		# enlevé sox, corrigé libav-tools
+
+IFS="
+"
+
+########################### PRÉ-REQUIS #################################
+	# On s'assure que 'avconv' est bien installé
+	avconv_exists=`which avconv | grep -c "avconv"`
+
+	# On affiche une erreur si 'avconv' n'est pas installé
+	# On tente une installation automatique de 'avconv'
+	if [ $avconv_exists -eq 0 ]; then
+		avconv_error=`zenity --error --title="Erreur - Outil de conversion manquant !" --text="Vous devez installer le paquet libav-tools afin d'utiliser ce script.\n\nTentative d'installation automatique amorcée."`;
+		install_avconv=`gksudo apt-get install libav-tools | zenity --progress --pulsate --title "Installation de libav-tools" --text "Installation en cours..." --auto-close`;
+	fi
+	
+	# On s'assure que l'installation automatique de 'avconv' a réussi
+	avconv_exists2=`which avconv | grep -c "avconv"`
+	
+	# Si ce n'est pas le cas, on affiche une erreur et on quitte
+	if [ $avconv_exists2 -eq 0 ]; then
+		zenity --error --title="Erreur détectée !" --text="ERREUR: La tentative d'installation automatique a échouée. Veuillez installer libav-tools manuellement, à partir de votre terminal: sudo apt-get install libav-tools";
+		exit;
+	fi
+
+	# On s'assure qu'un fichier est sélectionné et du MIME "video"
+	mime=`file -bi "$1"`;
+	correct_video=`echo "$mime" | grep video | wc -l`;
+
+	# Si le fichier n'est pas de MIME "video"...
+	if [ ! $correct_video -eq 1 ]; then
+		zenity --error --title="Convertir la vidéo $version" --text="Veuillez sélectionner un fichier vidéo valide."
+		exit 1
+	fi
+
+########################### ENCODAGE VIDEO #############################
+	# Si le format vidéo est correct, afficher les options suivantes
+	if [ $correct_video -eq 1 ]; then
+
+	# Menu sélection du format de sortie
+	option=`zenity --list --width="430" --height="190" --title="Convertir la vidéo au format HTML5 $version" --text="Choisir un format dans lequel la vidéo <i><b>$1</b></i> sera convertie." --column="Format" --column="Description" \
+	"WEBM" "Convertir en WEBM/VP8 (sites web)" \
+	"OGV" "Convertir en OGG/THEORA (sites web)" \
+	"MP4" "Convertir en MP4/H264 (sites web)"`;
+
+	# Conversion vers format 'webm'
+	if [ "$option" = "WEBM" ]; then
+	encode_video=`avconv -i "$1" -b 1500k -vcodec libvpx -acodec libvorbis -ab 160000 -f webm -g 30 "$1".webm \
+	| zenity --progress --width="500" --pulsate --auto-close --title "Conversion en cours..." \
+	--text "Conversion de <b>"$1"</b> vers le format <b>WEBM</b>."`;
+	fi
+
+	# Conversion vers format 'ogv'
+	if [ "$option" = "OGV" ]; then
+	encode_video=`avconv -i "$1" -b 1500k -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 "$1".ogv \
+	| zenity --progress --width="500" --pulsate --auto-close --title "Conversion en cours..." \
+	--text "Conversion de <b>"$1"</b> vers le format <b>OGV</b>."`;
+	fi
+
+	# Conversion vers format 'mp4'
+	if [ "$option" = "MP4" ]; then
+	encode_video=`avconv -i "$1" -b 1500k -vcodec libx264 -pre:v main -g 30 "$1".mp4 \
+	| zenity --progress --width="500" --pulsate --auto-close --title "Conversion en cours..." \
+	--text "Conversion de <b>"$1"</b> vers le format <b>MP4</b>."`;
+	fi
+
+	# Afficher résultat de la conversion
+	if [[ $encode_video != 0 ]]; then
+	notify-send -i /usr/share/icons/Humanity/apps/48/totem.svg "Conversion de la vidéo - $option" "Conversion de $1 terminée !";
+	else
+	zenity --error --title "Erreur !" -- text "Echec de la conversion !";
+	fi
+fi
+
+	
+### FIN DU SCRIPT
+fi
+### FIN DU SCRIPT

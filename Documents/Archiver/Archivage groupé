@@ -3,7 +3,7 @@
 #Script permettant de compresser tous les fichiers d'un même format
 #Nom du script: Archivage groupé v1.1
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
+#Site Web: http://ankala.fr
 #Licence: GPL v3
 #À venir en v1.2: ?
 ########################################################################
@@ -16,5 +16,5 @@ IFS="
 	if [ "$?" == 1 ] ; then exit 0 
 	else
 	archivage=`find . -name \*.$format | zip archive_"$format" -@ | zenity --progress --pulsate --title "Archivage en cours..." --text "Tous les fichiers de type <b>$format</b> sont en cours d'archivage." --auto-close`;
-	notify-send "Archivage groupé" "Les fichiers $format ont été compressés dans l'archive "archive_$format" avec succès !"
+	notify-send -i /usr/share/icons/Humanity/actions/48/extract-archive.svg "Archivage groupé - $format" "Les fichiers $format ont été compressés dans "archive_$format" !"
 fi

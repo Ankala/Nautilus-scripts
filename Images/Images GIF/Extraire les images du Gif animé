@@ -3,36 +3,27 @@
 #Script permettant d'xtraire les images individuelles dun gif animé
 #Nom du script: Extraire les images du gif v1.0
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
-#Source:Documentation de ImageMagick
+#Site Web: http://ankala.fr
+#Source: Documentation de ImageMagick
 #Licence: GPL v3
 ########################################################################
 version="v1.0"
 
 
-	# On s'assure qu'un fichier est seléctionné
+	# On s'assure qu'un fichier est sélectionné et du MIME "image"
 	mime=`file -bi "$1"`;
-	correct_image="0";
-	
-	# On s'assure que le fichier est dans le bon format: gif
-	if echo "$1" | grep -q '.gif'|| echo "$1" | grep -q '.GIF'; then
-		echo "File is in .gif Format"
-		image_type="gif"
-		correct_image="1"
-	elif [ $1 -eq 0 ]; then
-		zenity --error --title="Erreur" --text="Vous devez sélectionner une image gif animée..."
-		exit 1
-	elif [ $correct_image -eq 0 ]; then
-		zenity --error --title="Erreur - Format non supporté -" --text="Sélectionnez une image au format gif valide."
-		exit 1
-	else
-		zenity --error --title="Erreur" --text="Erreur inconnue. Réessayez !"
+	correct_image=`echo "$mime" | grep image | wc -l`;
+
+	# Si le fichier n'est pas de MIME "image"...
+	if [ ! $correct_image -eq 1 ]; then
+		zenity --error --title="Extraire les images du Gif $version" --text="Veuillez sélectionner un fichier image valide."
 		exit 1
 	fi
+
 	# Si le fichier est dans le bon format
 	if [ $correct_image -eq "1" ]; then
 montage $1 -tile x1 -geometry '1x1+0+0<' -alpha On -background "rgba(0, 0, 0, 0.0)" -quality 100 sheet_$1.png \
-| zenity --progress --width="500" --pulsate --title "Extraction des images de $1" \
---text "Extraction des images en cours..." --auto-close
+| zenity --progress --width="500" --pulsate --title "Extraction des images en cours..." \
+--text "Extraction des images de $1." --auto-close
 fi
 

@@ -3,7 +3,7 @@
 #Script permettant d'aspirer tout un site web ou une partie de son contenu
 #Nom du script: Aspirateur Web v1.1
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
+#Site Web: http://ankala.fr
 #Licence: GPL v3
 #À venir en v1.2: ?
 ########################################################################
@@ -22,8 +22,10 @@ version="v1.1"
 	if [ "$?" == 1 ] ; then exit 1
 	else
 	aspireimg=`wget -r -l1 --no-parent robots=off -nH -nd -A".jpg,.png" "$imgurl" \
-	| zenity --progress --title "Aspiration des images en cours..." --text "Aspiration des images de <b>$imgurl</b> en cours..." --pulsate`;
+	| zenity --progress --title "Aspiration des images" --text "Aspiration des images de <b>$imgurl</b> en cours..." --pulsate`;
 	rm robots.txt
+notify-send -i /usr/share/icons/Humanity/apps/48/software-properties.svg "Aspiration d'images" "Les images de $imgurl ont été aspirées !";
+
 fi
 fi
 	# Option Site Web
@@ -32,9 +34,10 @@ fi
 	if [ "$?" == 1 ] ; then exit 1
 	else
 	aspire=`wget --random-wait -r -p -k -e robots=off -U mozilla "$url" \
-	| zenity --progress --title "Aspiration de site web en cours..." --text "Aspiration de <b>$url</b> en cours..." --pulsate`;
+	| zenity --progress --title "Aspiration de site web" --text "Aspiration de <b>$url</b> en cours..." --pulsate`;
 	rm robots.txt
-	fi
+notify-send -i /usr/share/icons/Humanity/apps/48/software-properties.svg "Aspiration de site web" "Le site web $imgurl a été aspiré !";	
+fi
 fi
 
 	# Option PDF
@@ -43,9 +46,10 @@ fi
 	if [ "$?" == 1 ] ; then exit 1
 	else
 	aspirepdf=`wget -r -l1 --no-parent robots=off -nH -nd -A".pdf" "$pdfurl" \
-	| zenity --progress --title "Aspiration des fichiers PDF en cours..." --text "Aspiration des PDF de <b>$pdfurl</b> en cours..." --pulsate`;
+	| zenity --progress --title "Aspiration des fichiers PDF" --text "Aspiration des PDF de <b>$pdfurl</b> en cours..." --pulsate`;
 	rm robots.txt
-	fi
+notify-send -i /usr/share/icons/Humanity/apps/48/software-properties.svg "Aspiration de PDF" "Les fichiers PDF de $imgurl ont été aspirés !";
+fi
 fi
 
 	# Option Archive seule
@@ -54,7 +58,8 @@ fi
 	if [ "$?" == 1 ] ; then exit 1
 	else
 	aspiretar=`wget -t2 "$tarurl" \
-	| zenity --progress --title "Téléchargement de l'archive en cours..." --text "Téléchargement de l'archive de <b>$tarurl</b> en cours..." --pulsate`;
+	| zenity --progress --title "Aspiration de l'archive" --text "Téléchargement de l'archive de <b>$tarurl</b> en cours..." --pulsate`;
 	rm robots.txt
-	fi
+notify-send -i /usr/share/icons/Humanity/apps/48/software-properties.svg "Aspiration d'archive" "L'archive de $imgurl a été aspirée !";
+fi
 fi

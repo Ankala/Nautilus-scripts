@@ -1,0 +1,33 @@
+#!/bin/bash
+########################################################################
+#Script permettant de transformer les images sélectionnées en miniatures (taille paramétrable)
+#Nom du script: Miniaturiser v1.1
+#Auteur: Astohan
+#Site Web: http://ankala.fr
+#Source: Documentation de ImageMagick
+#Licence: GPL v3
+#À venir en v1.2: Plus d'options ?
+########################################################################
+version="v1.1"		# polissage de code (mime type)
+IFS="
+"
+	# On s'assure qu'un fichier est sélectionné et du MIME "video"
+	mime=`file -bi "$1"`;
+	correct_image=`echo "$mime" | grep image | wc -l`;
+	
+	# Si le fichier n'est pas de MIME "video"...
+	if [ ! $correct_image -eq 1 ]; then
+		zenity --error --title="Miniaturiser $version" --text="Veuillez sélectionner un fichier image valide."
+		exit 1
+	fi
+
+	# Si le format du fichier est correct, on démarre l'opération
+	if [ $correct_image -eq "1" ]; then
+	# Paramétrer la résolution des miniatures
+  	checksize=`zenity --entry --title="Miniaturiser $version" --entry-text "150x150" --text="Les miniatures seront enregistrées dans le dossier 'miniatures' du répertoire courant. \n\nVous pouvez modifier la taille (résolution) des miniatures, en pixels.\n\nexemple: 125x125 ou 300x300"`
+mkdir miniatures
+mogrify -path miniatures -thumbnail $checksize $@ \
+| zenity --progress --width="500" --pulsate --title "Création des miniatures" \
+--text "Les images sélectionnées sont en cours de miniaturisation (dimensions $checksize)..." --auto-close
+notify-send -i /usr/share/icons/Humanity/categories/48/applications-viewers.svg "Miniaturisation" "Les images sélectionnées ont été converties en miniatures (dimensions $checksize) avec succès !"
+fi

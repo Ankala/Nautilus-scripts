@@ -3,7 +3,7 @@
 #Script permettant de compresser un ou plusieurs fichiers, de le découper et/ou de le recoller
 #Nom du script: Compresser & Recoller v1.1
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
+#Site Web: http://ankala.fr
 #Licence: GPL v3
 #À venir en v1.2: ?
 ########################################################################
@@ -16,7 +16,7 @@ IFS="
 	mime=`file -bi "$1"`;
 
 	# Menu Principal
-option=$(zenity --list --radiolist --title="Compresser & Découper $version" --column="Cocher" --column="Option" \
+	option=$(zenity --list --radiolist --title="Compresser & Découper $version" --text="Choisir une action pour le fichier <b>$1</b>." --column="Cocher" --column="Option" \
 TRUE "Compresser & Découper" \
 FALSE "Recoller l'archive")
 
@@ -28,7 +28,7 @@ FALSE "Recoller l'archive")
 tar -cvj $1 | split -b "$taille"m -d - "$1.tar.bz." \
 | zenity --progress --width="500" --pulsate --auto-close --title "Compression en cours..." \
 --text "Compression de <b>$1</b> en <b>"$1".tar.bz</b>.\nTaille des parties à créer: <b>$taille</b> Mo."
-	notify-send "Compression & Découpage" "Le fichier $1 a été découpé en parties de $taille Mo avec succès !"
+	notify-send -i /usr/share/icons/Humanity/actions/48/edit-cut.svg "Compression & Découpage" "Le fichier $1 a été découpé en parties de $taille Mo !"
 fi
 fi
 
@@ -46,5 +46,5 @@ final=$(echo $1 | cut -d "." -f ${CHAMPS})
 cat "$final"* | tar -xvj \
 | zenity --progress --width="500" --pulsate --auto-close --title "Recollage en cours..." \
 --text "L'archive <b>$1</b> est en train d'être recollée et directement décompressée.\nLa durée de l'opération dépend de la taille des parties découpées."
-notify-send "Recollage de l'archive" "Les parties de l'archive $1 ont été recollées avec succès !"
+notify-send -i /usr/share/icons/Humanity/actions/48/edit-copy.svg "Recollage de l'archive" "Les parties de l'archive $1 ont été recollées !"
 fi

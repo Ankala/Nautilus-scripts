@@ -3,7 +3,7 @@
 #Script permettant de générer des empreintes MD5, SHA ou CRC
 #Nom du script: Générer l'empreinte du fichier v1.0
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
+#Site Web: http://ankala.fr
 #Licence: GPL v3
 #À venir en v1.1: ?
 ########################################################################
@@ -43,6 +43,8 @@ md5Hash=`md5sum "$1"`;
 md5sansnom="${md5Hash%%  $FilePath$1}"
 zenity --question --title "Génération de l'empreinte MD5" --text="<u>Fichier source:</u> \n\n<b>$1</b> \n\n<u>Empreinte MD5:</u> \n\n<b>$md5sansnom</b> \n\nVoulez-vous crypter cette empreinte ?";
 
+notify-send -i /usr/share/icons/Humanity/actions/48/document-export.svg "Génération - $genere" "Empreinte MD5 de <b>$CheckName</b> générée avec succès !"
+
 	# Cryptage de l'empreinte MD5
 	if [ "$?" == 0 ] ; then 
 	gpg -c $CheckName.gpg
@@ -53,7 +55,7 @@ then
 	cd $dirname
 	(gpg -cq --force-mdc -o $CheckName.gpg --yes $CheckName)
 fi
-notify-send "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
+notify-send -i /usr/share/icons/Humanity/status/48/locked.svg "Cryptage - $genere" "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
 fi
 ################################### Cryptage terminé
 fi
@@ -68,6 +70,7 @@ fi
 crcHash=`cksum "$1"`;
 crcsansnom="${crcHash%%  $FilePath$1}"
 zenity --question --title "Génération de l'empreinte CRC de $1" --text="<u>Fichier source:</u> \n\n<b>$1</b> \n\n<u>Empreinte CRC:</u> \n\n<b>$crcsansnom</b> \n\nVoulez-vous crypter cette empreinte ?";
+notify-send -i /usr/share/icons/Humanity/actions/48/document-export.svg "Génération - $genere" "Empreinte CRC de <b>$CheckName</b> générée avec succès !"
 
 	# Cryptage de l'empreinte CRC
 	if [ "$?" == 0 ] ; then 
@@ -79,7 +82,7 @@ then
 	cd $dirname
 	(gpg -cq --force-mdc -o $CheckName.gpg --yes $CheckName)
 fi
-notify-send "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
+notify-send -i /usr/share/icons/Humanity/status/48/locked.svg "Cryptage - $genere" "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
 fi
 ########### Cryptage terminé
 fi
@@ -94,6 +97,7 @@ fi
 sha1Hash=`sha1sum "$1"`;
 sha1sansnom="${sha1Hash%%  $FilePath$1}"
 zenity --question --title "Génération de l'empreinte SHA1 de $1" --text="<u>Fichier source:</u> \n\n<b>$1</b> \n\n<u>Empreinte SHA1:</u> \n\n<b>$sha1sansnom</b> \n\nVoulez-vous crypter cette empreinte ?";
+notify-send -i /usr/share/icons/Humanity/actions/48/document-export.svg "Génération - $genere" "Empreinte SHA1 de <b>$CheckName</b> générée avec succès !"
 
 	# Cryptage de l'empreinte SHA1
 	if [ "$?" == 0 ] ; then 
@@ -105,7 +109,7 @@ then
 	cd $dirname
 	(gpg -cq --force-mdc -o $CheckName.gpg --yes $CheckName)
 fi
-notify-send "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
+notify-send -i /usr/share/icons/Humanity/status/48/locked.svg "Cryptage - $genere" "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
 fi
 ################################### Cryptage terminé
 fi
@@ -120,18 +124,19 @@ fi
 sha256Hash=`sha256sum "$1"`;
 sha256sansnom="${sha256Hash%%  $FilePath$1}"
 zenity --question --title "Génération de l'empreinte SHA256 de $1" --text="<u>Fichier source:</u> \n\n<b>$1</b> \n\n<u>Empreinte SHA256:</u> \n\n<b>$sha256sansnom</b> \n\nVoulez-vous crypter cette empreinte ?";
+notify-send -i /usr/share/icons/Humanity/actions/48/document-export.svg "Génération - $genere" "Empreinte SHA256 de <b>$CheckName</b> générée avec succès !"
 
-	# Cryptage de l'empreinte SHA1
+	# Cryptage de l'empreinte SHA256
 	if [ "$?" == 0 ] ; then 
 	gpg -c $CheckName.gpg
 	if [[ $ext != "gpg" ]]
-then
+	then
 	dirname=`dirname $CheckName`
 	basename=`basename $CheckName`
 	cd $dirname
 	(gpg -cq --force-mdc -o $CheckName.gpg --yes $CheckName)
 fi
-notify-send "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
+	notify-send -i /usr/share/icons/Humanity/status/48/locked.svg "Cryptage - $genere" "Fichier crypté <b>$CheckName.gpg</b> créé avec succès !"
 fi
 ################################### Cryptage terminé
 fi

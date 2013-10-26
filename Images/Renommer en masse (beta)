@@ -1,0 +1,50 @@
+#!/bin/bash
+########################################################################
+#Script permettant de renommer toutes les images d'un dossier
+#Nom du script: Renommer les images en masse v1.0
+#Auteur: Astohan
+#Site Web: http://ankala.fr
+#Licence: GPL v3
+#À venir en v1.1:
+########################################################################
+version="v1.0"
+
+IFS="
+"
+
+let "indice=1"
+
+	# Menu Principal
+option=$(zenity --list --width="480" --height="180" --title="Renommer les images en masse $version" --text="Choisir un mode de renommage des images." --column="Mode" --column="Description" \
+"Numérique" "Renomme les images en 1.jpg, 2.jpg etc..." \
+"Préfixe" "Ajoute un préfixe avant chaque image")
+
+	# Option Numérique
+	if [ "$option" = "Numérique" ]; then
+	for fichier in *.jpg *.jpeg *.JPG *.JPEG *.gif *.GIF *.png *.PNG *.bmp *.BMP;
+do
+            if [ -f "$fichier" ]; then
+            extension=${fichier##*.}
+            echo "$fichier" "=>" "$nom-$indice.$extension"
+            mv "$fichier" `printf "%02d" $indice`".$extension"
+            let "indice+=1"
+        fi
+done
+fi
+
+	# Option Préfixe
+	if [ "$option" = "Préfixe" ]; then
+	nom=$(zenity --entry --title="Renommer les images en masse $version" --entry-text="image" --text="Entrez le préfixe commun à chaque image. \nLa numérotation s'y ajoutera automatiquement.\n\nPar exemple: image pour image-1.png, image-2.png et ainsi de suite.")
+	if [ "$?" == 1 ] ; then return 1
+	else
+	for fichier in *.jpg *.jpeg *.JPG *.JPEG *.gif *.GIF *.png *.PNG *.bmp *.BMP;
+do
+            if [ -f "$fichier" ]; then
+            extension=${fichier##*.}
+            echo "$fichier" "=>" "$nom-$indice.$extension"
+            mv "$fichier" "$nom-"`printf "%02d" $indice`".$extension"
+            let "indice+=1"
+        fi
+done
+fi
+fi

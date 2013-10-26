@@ -3,7 +3,7 @@
 #Script permettant de décoder des fichiers MD5, SHA ou CRC cryptés en gpg
 #Nom du script: Décoder l'empreinte cryptée v1.0
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
+#Site Web: http://ankala.fr
 #Licence: GPL v3
 #À venir en v1.1: ?
 ########################################################################
@@ -29,13 +29,6 @@ done
 	SelectedFile=`zenity --file-selection --title "Veuillez choisir le FICHIER CRYPTÉ" --file-filter="Fichiers cryptés | *.gpg"`
 
 	# Erreur si le fichier est vide ou inexistant
-	if [ "$SelectedFile" = "" ]; then
-	if [ $# != 1 ]; then
-	zenity --error --text="Vous devez choisir un fichier à décrypter !"
-exit 0
-fi
-fi
-	# Erreur si le fichier est vide ou inexistant
 	if [ `stat --printf="%s" "$SelectedFile"` = "0" ]; then
  zenity --warning --text="Le fichier <b>$SelectedFile</b> est vide !
 Il est inutile de décrypter un fichier vide !"
@@ -43,9 +36,7 @@ exit 0
 fi
 
 	# Si le fichier est valide, on procède au décodage
+	if [ ! "$SelectedFile" = "" ]; then
 	zenity --question --title="Décoder une empreinte cryptée" --text="Voulez-vous décrypter ce fichier ? \n\n<b>$SelectedFile</b>" && (gpg $SelectedFile)
-	notify-send "Décodage de l'empreinte cryptée" "L'empreinte $SelectedFile a été décodée avec succès !"
+	notify-send -i /usr/share/icons/Humanity/status/48/locked.svg "Décodage de l'empreinte cryptée" "L'empreinte $SelectedFile a été décodée avec succès !"
 fi
-### Fin
-fi
-### Fin

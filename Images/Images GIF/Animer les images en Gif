@@ -3,14 +3,14 @@
 #Script permettant de créer un gif animé à partir d'images
 #Nom du script: Animer les images en Gif v1.0
 #Auteur: Astohan
-#Site Web: http://ankala.co.cc
-#Source:Documentation de ImageMagick
+#Site Web: http://ankala.fr
+#Source: Documentation de ImageMagick
 #Licence: GPL v3
 ########################################################################
 version="v1.0"
 
 
-for f in *.jpg *.png *.jpeg *.JPG *.JPEG;
+for f in *.jpg *.png *.jpeg *.JPG *.JPEG *.PNG;
 do
 	# L'utilisateur choisit ses préférences
 	temps=$(zenity --entry --title="Animer les images en Gif $version" --text "Définir le délai d'animation entre chaque image.\n\nexemple: 100 = 1 seconde" --entry-text="100")
